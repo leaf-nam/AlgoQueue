@@ -4,6 +4,7 @@ import com.leaf.algoqueue.common.dto.ProblemCreateRequest;
 import com.leaf.algoqueue.common.dto.ProblemResponse;
 import com.leaf.algoqueue.common.dto.ProblemUpdateRequest;
 import com.leaf.algoqueue.common.enums.Platform;
+import com.leaf.algoqueue.service.ProblemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
