@@ -1,4 +1,4 @@
-# SolveQueue
+# AlgoQueue
 
 코딩 테스트 문제 풀이 기록 및 복습 관리 플랫폼
 
