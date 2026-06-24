@@ -1,4 +1,4 @@
-package com.leaf.algoqueue.common;
+package com.leaf.algoqueue.common.enums;
 
 public enum Platform {
     PROGRAMMERS,    // 프로그래머스

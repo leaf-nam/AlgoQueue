@@ -1,6 +1,6 @@
 package com.leaf.algoqueue.repository.entity;
 
-import com.leaf.algoqueue.common.Language;
+import com.leaf.algoqueue.common.enums.Language;
 import jakarta.persistence.*;
 import lombok.*;
 

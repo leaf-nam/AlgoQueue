@@ -1,7 +1,7 @@
 package com.leaf.algoqueue.repository.entity;
 
-import com.leaf.algoqueue.common.Difficulty;
-import com.leaf.algoqueue.common.Platform;
+import com.leaf.algoqueue.common.enums.Difficulty;
+import com.leaf.algoqueue.common.enums.Platform;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -48,6 +48,9 @@ public class Problem {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @Column(nullable = false)
+    private boolean hidden = false;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -70,6 +73,18 @@ public class Problem {
         this.title = title;
         this.difficulty = difficulty;
         this.category = category;
+        this.hidden = hidden;
+    }
+
+    // 제목·난이도·카테고리 수정
+    public void update(String title, Difficulty difficulty, Category category) {
+        this.title = title;
+        this.difficulty = difficulty;
+        this.category = category;
+    }
+
+    public void updateHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 
     public void updateDifficulty(Difficulty difficulty) {

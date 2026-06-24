@@ -32,6 +32,10 @@ public class Category {
         this.hidden = hidden;
     }
 
+    public void updateName(String name) {
+        this.name = name;
+    }
+
     public void updateHidden(boolean hidden) {
         this.hidden = hidden;
     }

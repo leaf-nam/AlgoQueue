@@ -1,4 +1,4 @@
-package com.leaf.algoqueue.common;
+package com.leaf.algoqueue.common.enums;
 
 /**
  * 문제 난이도
