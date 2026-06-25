@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 
@@ -55,15 +56,20 @@ public class ProblemController {
     public ResponseEntity<ProblemResponse> createProblem(
             @Valid @RequestBody ProblemCreateRequest request
     ) {
-        ProblemResponse response = problemService.createProblem(request);
+        try {
+            ProblemResponse response = problemService.createProblem(request);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(response.getId())
-                .toUri();
+            URI location = ServletUriComponentsBuilder
+                    .fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(response.getId())
+                    .toUri();
 
-        return ResponseEntity.created(location).body(response);
+            return ResponseEntity.created(location).body(response);
+
+        } catch (MalformedURLException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**
@@ -75,7 +81,13 @@ public class ProblemController {
             @PathVariable Long id,
             @Valid @RequestBody ProblemUpdateRequest request
     ) {
-        return ResponseEntity.ok(problemService.updateProblem(id, request));
+        try {
+
+            return ResponseEntity.ok(problemService.updateProblem(id, request));
+
+        } catch (MalformedURLException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**

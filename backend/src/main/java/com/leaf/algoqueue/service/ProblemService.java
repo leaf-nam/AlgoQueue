@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 @Service
@@ -43,7 +44,7 @@ public class ProblemService {
     // -----------------------------------------------------------------------
 
     @Transactional
-    public ProblemResponse createProblem(ProblemCreateRequest req) {
+    public ProblemResponse createProblem(ProblemCreateRequest req) throws MalformedURLException {
         if (problemRepository.existsByPlatformAndProblemNumber(req.getPlatform(), req.getProblemNumber())) {
             throw new IllegalArgumentException(
                     "이미 등록된 문제입니다. platform=%s, problemNumber=%s"
@@ -56,6 +57,7 @@ public class ProblemService {
                 .platform(req.getPlatform())
                 .problemNumber(req.getProblemNumber())
                 .title(req.getTitle())
+                .url(req.getUrl())
                 .difficulty(req.getDifficulty())
                 .category(category)
                 .hidden(req.isHidden())
@@ -69,11 +71,11 @@ public class ProblemService {
     // -----------------------------------------------------------------------
 
     @Transactional
-    public ProblemResponse updateProblem(Long id, ProblemUpdateRequest req) {
+    public ProblemResponse updateProblem(Long id, ProblemUpdateRequest req) throws MalformedURLException {
         Problem problem = findProblemById(id);
         Category category = findCategoryById(req.getCategoryId());
 
-        problem.update(req.getTitle(), req.getDifficulty(), category);
+        problem.update(req.getTitle(), req.getUrl(), req.getDifficulty(), category);
 
         return ProblemResponse.from(problem);
     }

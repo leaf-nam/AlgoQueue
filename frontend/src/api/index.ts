@@ -78,6 +78,7 @@ export const api = {
       platform: Platform;
       problemNumber: string;
       title: string;
+      url: string;
       difficulty?: Difficulty;
       categoryId: number;
       hidden?: boolean;
@@ -88,7 +89,12 @@ export const api = {
       }),
     update: (
       id: number,
-      body: { title: string; difficulty?: Difficulty; categoryId: number },
+      body: {
+        title: string;
+        url: string;
+        difficulty?: Difficulty;
+        categoryId: number;
+      },
     ) =>
       req<Problem>(`/api/problems/${id}`, {
         method: "PUT",

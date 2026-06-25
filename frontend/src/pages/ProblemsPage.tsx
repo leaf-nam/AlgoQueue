@@ -54,6 +54,7 @@ export default function ProblemsPage() {
     platform: "" as Platform | "",
     problemNumber: "",
     title: "",
+    url: "",
     difficulty: "" as Difficulty | "",
     categoryId: "" as number | "",
     hidden: false,
@@ -86,6 +87,7 @@ export default function ProblemsPage() {
       platform: "",
       problemNumber: "",
       title: "",
+      url: "",
       difficulty: "",
       categoryId: "",
       hidden: false,
@@ -99,6 +101,7 @@ export default function ProblemsPage() {
       platform: p.platform,
       problemNumber: p.problemNumber,
       title: p.title,
+      url: p.url,
       difficulty: p.difficulty ?? "",
       categoryId: p.categoryId,
       hidden: p.hidden,
@@ -114,6 +117,7 @@ export default function ProblemsPage() {
           platform: form.platform as Platform,
           problemNumber: form.problemNumber,
           title: form.title,
+          url: form.url,
           difficulty: (form.difficulty as Difficulty) || undefined,
           categoryId: Number(form.categoryId),
           hidden: form.hidden,
@@ -122,6 +126,7 @@ export default function ProblemsPage() {
       } else if (editing) {
         await api.problems.update(editing.id, {
           title: form.title,
+          url: form.url,
           difficulty: (form.difficulty as Difficulty) || undefined,
           categoryId: Number(form.categoryId),
         });
@@ -232,7 +237,14 @@ export default function ProblemsPage() {
                   <tr key={p.id} style={{ opacity: p.hidden ? 0.5 : 1 }}>
                     <td className="text-mono text-muted">#{p.problemNumber}</td>
                     <td className="primary">
-                      {p.title}
+                      <a
+                        href={p.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-decoration-underline"
+                      >
+                        {p.title}
+                      </a>
                       {p.hidden && (
                         <span
                           className="badge badge-neutral"
@@ -336,6 +348,17 @@ export default function ProblemsPage() {
                   setForm((f) => ({ ...f, title: e.target.value }))
                 }
                 placeholder="문제 제목"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">URL</label>
+              <input
+                className="form-input"
+                value={form.url}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, url: e.target.value }))
+                }
+                placeholder="문제 URL"
               />
             </div>
             <div className="form-row">

@@ -6,12 +6,16 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.net.URL;
+
 @Getter
 @NoArgsConstructor
 public class ProblemUpdateRequest {
 
     @NotBlank(message = "문제명은 필수입니다.")
     private String title;
+
+    private String url;
 
     private Difficulty difficulty;
 

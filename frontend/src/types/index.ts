@@ -34,6 +34,7 @@ export interface Problem {
   platform: Platform;
   problemNumber: string;
   title: string;
+  url: string;
   difficulty: Difficulty | null;
   categoryId: number;
   categoryName: string;

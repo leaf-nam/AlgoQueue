@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.net.URL;
+
 @Getter
 @NoArgsConstructor
 public class ProblemCreateRequest {
@@ -19,6 +21,9 @@ public class ProblemCreateRequest {
 
     @NotBlank(message = "문제명은 필수입니다.")
     private String title;
+
+    @NotBlank(message = "링크는 필수입니다.")
+    private String url;
 
     private Difficulty difficulty;
 
