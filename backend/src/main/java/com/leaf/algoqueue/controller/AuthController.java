@@ -2,9 +2,14 @@ package com.leaf.algoqueue.controller;
 
 import com.leaf.algoqueue.common.dto.*;
 import com.leaf.algoqueue.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,11 +27,13 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
-            @Valid @RequestBody LoginRequest request
+            @RequestBody LoginRequest request,
+            HttpServletRequest servletRequest,   // 추가
+            HttpServletResponse servletResponse  // 추가
     ) {
-        return ResponseEntity.ok(authService.login(request));
+        LoginResponse response = authService.login(request, servletRequest, servletResponse);
+        return ResponseEntity.ok(response);
     }
-
     /**
      * POST /api/auth/signup
      * 이메일 인증코드 발송

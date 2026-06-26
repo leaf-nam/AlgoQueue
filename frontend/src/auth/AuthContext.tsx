@@ -6,7 +6,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-
+import { authEvent } from "./AuthEvent";
 // ── Types ──────────────────────────────────────────────────
 export interface AuthUser {
   id: number;
@@ -24,7 +24,6 @@ interface AuthContextValue {
 // ── Context ────────────────────────────────────────────────
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const TOKEN_KEY = "aq_token";
 const USER_KEY = "aq_user";
 
 // ── Provider ───────────────────────────────────────────────
@@ -32,18 +31,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleUnauthenticated = () => {
+    setUser(null);
+    localStorage.removeItem(USER_KEY);
+  };
+
   // Restore session on first mount
   useEffect(() => {
+    authEvent.subscribe(handleUnauthenticated);
     try {
       const raw = localStorage.getItem(USER_KEY);
-      const token = localStorage.getItem(TOKEN_KEY);
-      if (raw && token) {
+      if (raw) {
         setUser(JSON.parse(raw) as AuthUser);
       }
     } catch {
       // corrupted data → treat as logged out
       localStorage.removeItem(USER_KEY);
-      localStorage.removeItem(TOKEN_KEY);
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +59,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     setUser(null);
     // TODO: POST /api/auth/logout (invalidate server-side token)

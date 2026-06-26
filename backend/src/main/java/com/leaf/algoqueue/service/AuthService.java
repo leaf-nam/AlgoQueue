@@ -3,10 +3,19 @@ package com.leaf.algoqueue.service;
 import com.leaf.algoqueue.common.dto.*;
 import com.leaf.algoqueue.repository.UserRepository;
 import com.leaf.algoqueue.repository.entity.User;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -19,21 +28,33 @@ public class AuthService {
 
     private static final Duration VERIFY_EXPIRE_TIME = Duration.ofMinutes(3);
     private final UserRepository userRepository;
+    private final SecurityContextRepository securityContextRepository =
+            new HttpSessionSecurityContextRepository();
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
     private final RedisTemplate<String, Object> redisTemplate;
     private final MailService mailService;
 
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
 
-        User user = userRepository.findByEmail(request.getEmail())
+        userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
 
-        if (!passwordEncoder.matches(
-                request.getPassword(),
-                user.getPassword()
-        )) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
+        Authentication auth =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getEmail(),
+                                request.getPassword()
+                        )
+                );
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
+        securityContextRepository.saveContext(context, servletRequest, servletResponse);
+
+        User user = (User) auth.getPrincipal();
 
         return LoginResponse.builder()
                 .id(user.getId())

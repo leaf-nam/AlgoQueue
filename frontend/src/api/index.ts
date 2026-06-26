@@ -17,16 +17,24 @@ import type {
   SignupRequest,
   VerifyRequest,
 } from "../types";
+import { authEvent } from "../auth/AuthEvent";
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
 async function req<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
+    method: options?.method ?? "GET",
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     ...options,
   });
+
+  if (res.status === 403) {
+    authEvent.emitUnauthenticated();
+    throw new Error("인증이 만료되었습니다.");
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText);
