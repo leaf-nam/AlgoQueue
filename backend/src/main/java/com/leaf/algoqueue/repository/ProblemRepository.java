@@ -30,4 +30,11 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
             @Param("categoryId") Long categoryId,
             @Param("hidden")     Boolean hidden
     );
+
+    @Query("""
+        select p
+        from Problem p
+        where (:solvedIds is null or p.id not in :solvedIds)
+    """)
+    List<Problem> findRecommendCandidates(List<Long> solvedIds);
 }
