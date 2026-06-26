@@ -16,7 +16,7 @@ import ProblemsPage from "./pages/ProblemsPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import SettingsPage from "./pages/SettingsPage";
 
-import "./Styles/App.css";
+import "./styles/App.css";
 import SolvePage from "./pages/SolvePage";
 import AlgoQueuePage from "./pages/AlgoQueuePage";
 

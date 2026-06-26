@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { api } from "../api";
 import { useAuth } from "../auth/AuthContext";
-import "../Styles/Login.css";
+import "../styles/Login.css";
 import { useNavigate } from "react-router-dom";
 
 // ────────────────────────────────────────────────────────────
@@ -30,19 +30,6 @@ interface FieldError {
   confirmNewPassword?: string;
   general?: string;
 }
-
-// ────────────────────────────────────────────────────────────
-// Constants
-// ────────────────────────────────────────────────────────────
-const INITIAL_FORM: FormState = {
-  email: "",
-  password: "",
-  nickname: "",
-  confirmPassword: "",
-  verifyCode: "",
-  newPassword: "",
-  confirmNewPassword: "",
-};
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PW_RE = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/;

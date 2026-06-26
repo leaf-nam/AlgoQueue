@@ -12,7 +12,7 @@ export default function SolvePage() {
   const [timerKey, setTimerKey] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0); // seconds
   const [timerProblem, setTP] = useState<number | "">("");
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const intervalRef = useRef<number | undefined>(undefined);
 
   // Record Modal (타이머 중지 후 기록용)
   const [recordModal, setRecordModal] = useState(false);
