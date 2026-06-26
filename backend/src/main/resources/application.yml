@@ -4,7 +4,7 @@ spring:
   jpa:
     database: mysql
     hibernate:
-      ddl-auto: validate
+      ddl-auto: ${MYSQL_DDL_AUTO}
     properties:
       hibernate:
         show_sql: true
@@ -36,7 +36,7 @@ spring:
 server:
   servlet:
     session:
-      timeout: 30m
+      timeout: 24h
 
 logging:
   level:
