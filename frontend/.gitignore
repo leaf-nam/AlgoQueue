@@ -1,0 +1,59 @@
+# dependencies
+node_modules/
+
+# build outputs
+dist/
+build/
+
+# environment variables
+.env
+.env.*
+!.env.example
+
+# logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# cache
+.cache/
+.parcel-cache/
+.vite/
+
+# test
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# local settings
+*.local
+
+# eslint
+.eslintcache
+
+# temporary files
+tmp/
+temp/
+
+# package manager
+.pnpm-store/
+
+# yarn
+.yarn/
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
