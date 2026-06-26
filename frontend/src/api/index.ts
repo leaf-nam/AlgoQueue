@@ -10,21 +10,40 @@ import type {
   Platform,
   Language,
   Difficulty,
+  ResetPasswordRequest,
+  ForgotPasswordRequest,
+  LoginRequest,
+  LoginResponse,
+  SignupRequest,
+  VerifyRequest,
 } from "../types";
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
 async function req<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     ...options,
   });
+
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText);
     throw new Error(text || `HTTP ${res.status}`);
   }
-  if (res.status === 204) return undefined as T;
-  return res.json();
+
+  if (res.status === 204) {
+    return undefined as T;
+  }
+
+  const text = await res.text();
+
+  if (!text) {
+    return undefined as T;
+  }
+
+  return JSON.parse(text) as T;
 }
 
 // ─── User ─────────────────────────────────────────────────────────────────────
@@ -212,6 +231,38 @@ export const api = {
       req<TimerStopResponse>("/api/timer/stop", {
         method: "POST",
         body: JSON.stringify({ timerKey }),
+      }),
+  },
+
+  auth: {
+    login: (body: LoginRequest) =>
+      req<LoginResponse>("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+
+    signup: (body: SignupRequest) =>
+      req<void>("/api/auth/signup", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+
+    verify: (body: VerifyRequest) =>
+      req<User>("/api/auth/verify", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+
+    forgotPassword: (body: ForgotPasswordRequest) =>
+      req<void>("/api/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+
+    resetPassword: (body: ResetPasswordRequest) =>
+      req<void>("/api/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify(body),
       }),
   },
 };

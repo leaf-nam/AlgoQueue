@@ -16,8 +16,8 @@ export interface AuthUser {
 
 interface AuthContextValue {
   user: AuthUser | null;
-  isLoading: boolean; // true while restoring session from storage
-  login: (user: AuthUser, token: string) => void;
+  isLoading: boolean;
+  login: (user: AuthUser) => void;
   logout: () => void;
 }
 
@@ -25,11 +25,11 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 const TOKEN_KEY = "aq_token";
-const USER_KEY  = "aq_user";
+const USER_KEY = "aq_user";
 
 // ── Provider ───────────────────────────────────────────────
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser]         = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Restore session on first mount
@@ -49,9 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = useCallback((user: AuthUser, token: string) => {
-    localStorage.setItem(TOKEN_KEY, token);
+  const login = useCallback((user: AuthUser) => {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
+
     setUser(user);
   }, []);
 

@@ -18,8 +18,15 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String username;
+    // 화면에 표시되는 닉네임
+    @Column(nullable = false, length = 50)
+    private String nickname;
+
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -36,7 +43,17 @@ public class User {
     }
 
     @Builder
-    public User(String username) {
-        this.username = username;
+    public User(
+            String nickname,
+            String email,
+            String password
+    ) {
+        this.nickname = nickname;
+        this.email = email;
+        this.password = password;
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
     }
 }

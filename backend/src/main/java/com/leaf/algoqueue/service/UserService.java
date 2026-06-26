@@ -1,6 +1,5 @@
 package com.leaf.algoqueue.service;
 
-import com.leaf.algoqueue.common.dto.UserCreateRequest;
 import com.leaf.algoqueue.common.dto.UserResponse;
 import com.leaf.algoqueue.repository.UserRepository;
 import com.leaf.algoqueue.repository.entity.User;
@@ -18,19 +17,6 @@ public class UserService {
 
     public UserResponse getUser(Long id) {
         return UserResponse.from(findById(id));
-    }
-
-    @Transactional
-    public UserResponse createUser(UserCreateRequest req) {
-        if (userRepository.existsByUsername(req.getUsername())) {
-            throw new IllegalArgumentException("이미 사용 중인 사용자명입니다. username=" + req.getUsername());
-        }
-
-        User user = User.builder()
-                .username(req.getUsername())
-                .build();
-
-        return UserResponse.from(userRepository.save(user));
     }
 
     public User findById(Long id) {

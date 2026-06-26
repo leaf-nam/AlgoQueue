@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from "react";
+import { api } from "../api";
+import { useAuth } from "../auth/AuthContext";
 import "../Styles/Login.css";
+import { useNavigate } from "react-router-dom";
 
 // ────────────────────────────────────────────────────────────
 // Types
@@ -305,15 +308,29 @@ function SignupModal({
 
   const handleSubmit = async () => {
     const e = validate();
+
     if (Object.keys(e).length) {
       setErrors(e);
       return;
     }
+
     setLoading(true);
-    // TODO: API call – POST /api/auth/signup
-    await new Promise((r) => setTimeout(r, 900));
-    setLoading(false);
-    onVerify(form.email);
+
+    try {
+      await api.auth.signup({
+        email: form.email,
+        password: form.password,
+        nickname: form.nickname,
+      });
+
+      onVerify(form.email);
+    } catch (err: any) {
+      setErrors({
+        general: err.response?.data?.message ?? "인증코드 발송 실패",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -425,26 +442,41 @@ function VerifyModal({
 
   const handleSubmit = async () => {
     const e: FieldError = {};
-    if (!code || code.length < 6)
-      e.verifyCode = "6자리 인증 코드를 입력하세요.";
-    if (context === "forgot") {
-      if (!newPw) e.newPassword = "새 비밀번호를 입력하세요.";
-      else if (!PW_RE.test(newPw))
-        e.newPassword = "영문·숫자·특수문자 포함 8자 이상이어야 합니다.";
-      if (newPw !== confirmPw)
-        e.confirmNewPassword = "비밀번호가 일치하지 않습니다.";
+
+    if (!code) {
+      e.verifyCode = "인증번호를 입력하세요.";
     }
+
     if (Object.keys(e).length) {
       setErrors(e);
       return;
     }
-    setLoading(true);
-    // TODO: API call – POST /api/auth/verify or /api/auth/reset-password
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    onComplete();
-  };
 
+    setLoading(true);
+
+    try {
+      if (context === "signup") {
+        await api.auth.verify({
+          email,
+          code,
+        });
+      } else {
+        await api.auth.resetPassword({
+          email,
+          code,
+          newPassword: newPw,
+        });
+      }
+
+      onComplete();
+    } catch (err: any) {
+      setErrors({
+        general: err.response?.data?.message ?? "인증 실패",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Modal onClose={onClose}>
       <h2 className="aq-modal-title">
@@ -563,20 +595,24 @@ function ForgotModal({
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!email) {
-      setError("이메일을 입력하세요.");
-      return;
-    }
     if (!EMAIL_RE.test(email)) {
       setError("올바른 이메일 형식이 아닙니다.");
       return;
     }
-    setError("");
+
     setLoading(true);
-    // TODO: API call – POST /api/auth/forgot-password
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    onVerify(email);
+
+    try {
+      await api.auth.forgotPassword({
+        email,
+      });
+
+      onVerify(email);
+    } catch (err: any) {
+      setError(err.response?.data?.message ?? "인증코드 발송 실패");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -708,18 +744,42 @@ export default function LoginPage() {
     return e;
   };
 
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
   const handleLogin = async () => {
     const e = validate();
+
     if (Object.keys(e).length) {
       setErrors(e);
       return;
     }
+
     setLoading(true);
-    // TODO: API call – POST /api/auth/login
-    await new Promise((r) => setTimeout(r, 900));
-    setLoading(false);
-    // TODO: redirect to dashboard on success
-    showToast("로그인 성공! 대시보드로 이동합니다.", "success");
+    setErrors({});
+
+    try {
+      const response = await api.auth.login({
+        email: form.email,
+        password: form.password,
+      });
+
+      login({
+        id: response.id,
+        email: response.email,
+        nickname: response.nickname,
+      });
+
+      showToast("로그인 성공! 대시보드로 이동합니다.", "success");
+
+      navigate("/");
+    } catch (err) {
+      setErrors({
+        general: err instanceof Error ? err.message : "로그인에 실패했습니다.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const openSignup = () => setModal("signup");
