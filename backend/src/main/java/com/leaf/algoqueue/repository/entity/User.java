@@ -2,9 +2,13 @@ package com.leaf.algoqueue.repository.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -12,14 +16,21 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(exclude = {"problemSettings", "solveHistories"})
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String username;
+    // 화면에 표시되는 닉네임
+    @Column(nullable = false, length = 50)
+    private String nickname;
+
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -36,7 +47,27 @@ public class User {
     }
 
     @Builder
-    public User(String username) {
-        this.username = username;
+    public User(
+            String nickname,
+            String email,
+            String password
+    ) {
+        this.nickname = nickname;
+        this.email = email;
+        this.password = password;
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
     }
 }

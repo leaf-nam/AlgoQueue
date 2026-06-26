@@ -47,4 +47,11 @@ public interface SolveHistoryRepository extends JpaRepository<SolveHistory, Long
             @Param("id")     Long id,
             @Param("userId") Long userId
     );
+
+    @Query("""
+        select sh.problem.id
+        from SolveHistory sh
+        where sh.user.id = :userId
+    """)
+    List<Long> findSolvedProblemIdsByUserId(Long userId);
 }
