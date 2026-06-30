@@ -18,16 +18,29 @@ services:
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=128M
+      - --max-connections=30
+      - --table-open-cache=200
+    mem_limit: 300m
 
   redis:
     image: redis:7.4-alpine
     container_name: algoqueue-redis
     restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "no"
+      - --maxmemory
+      - 64mb
+      - --maxmemory-policy
+      - allkeys-lru
     volumes:
       - redis_data:/data
+    mem_limit: 64m
 
   app:
-    image: algoqueue-backend:latest
+    image: 1eaf/algoqueue-backend:latest
     env_file:
       - .env
     container_name: algoqueue-backend
@@ -37,13 +50,20 @@ services:
       - redis
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      JAVA_TOOL_OPTIONS: >
+        -Xms128m
+        -Xmx256m
+        -XX:+UseSerialGC
+        -XX:MaxMetaspaceSize=128m
+    mem_limit: 384m
 
   frontend:
-    image: algoqueue-frontend:latest
+    image: 1eaf/algoqueue-frontend:latest
     container_name: algoqueue-frontend
     restart: unless-stopped
     ports:
       - "80:80"
+    mem_limit: 64m
 
 volumes:
   mysql_data:
