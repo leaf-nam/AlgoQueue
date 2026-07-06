@@ -27,6 +27,7 @@ public class SolveHistoryResponse {
     private boolean success;
     private Integer elapsedTime;
     private String memo;
+    private String sourceCode;
     private LocalDateTime solvedAt;
 
     public static SolveHistoryResponse from(SolveHistory sh) {
@@ -42,6 +43,7 @@ public class SolveHistoryResponse {
                 .success(sh.isSuccess())
                 .elapsedTime(sh.getElapsedTime())
                 .memo(sh.getMemo())
+                .sourceCode(sh.getSourceCode())
                 .solvedAt(sh.getSolvedAt())
                 .build();
     }

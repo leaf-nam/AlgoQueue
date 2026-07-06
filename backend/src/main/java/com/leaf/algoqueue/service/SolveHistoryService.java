@@ -1,5 +1,6 @@
 package com.leaf.algoqueue.service;
 
+import com.leaf.algoqueue.common.dto.CodeUpdateRequest;
 import com.leaf.algoqueue.common.dto.MemoUpdateRequest;
 import com.leaf.algoqueue.common.dto.SolveHistoryCreateRequest;
 import com.leaf.algoqueue.common.dto.SolveHistoryResponse;
@@ -62,6 +63,7 @@ public class SolveHistoryService {
                 .success(req.getSuccess())
                 .elapsedTime(req.getElapsedTime())
                 .memo(req.getMemo())
+                .sourceCode(req.getSourceCode())
                 .solvedAt(req.getSolvedAt())   // null이면 엔티티 생성자에서 now() 처리
                 .build();
 
@@ -76,6 +78,13 @@ public class SolveHistoryService {
     public SolveHistoryResponse updateMemo(Long userId, Long id, MemoUpdateRequest req) {
         SolveHistory history = findByIdAndUserId(id, userId);
         history.updateMemo(req.getMemo());
+        return SolveHistoryResponse.from(history);
+    }
+
+    @Transactional
+    public SolveHistoryResponse updateSourceCode(Long userId, Long id, CodeUpdateRequest req) {
+        SolveHistory history = findByIdAndUserId(id, userId);
+        history.updateSourceCode(req.getSourceCode());
         return SolveHistoryResponse.from(history);
     }
 

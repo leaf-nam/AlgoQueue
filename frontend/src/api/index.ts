@@ -204,6 +204,7 @@ export const api = {
         success: boolean;
         elapsedTime: number;
         memo?: string;
+        sourceCode?: string;
         solvedAt?: string;
       },
     ) =>
@@ -215,6 +216,11 @@ export const api = {
       req<SolveHistory>(`/api/users/${userId}/solve-histories/${id}/memo`, {
         method: "PUT",
         body: JSON.stringify({ memo }),
+      }),
+    updateCode: (userId: number, id: number, sourceCode: string) =>
+      req<SolveHistory>(`/api/users/${userId}/solve-histories/${id}/code`, {
+        method: "PUT",
+        body: JSON.stringify({ sourceCode }),
       }),
     delete: (userId: number, id: number) =>
       req<void>(`/api/users/${userId}/solve-histories/${id}`, {
