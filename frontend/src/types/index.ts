@@ -70,6 +70,7 @@ export interface SolveHistory {
   success: boolean;
   elapsedTime: number;
   memo: string | null;
+  sourceCode: string | null;
   solvedAt: string;
 }
 

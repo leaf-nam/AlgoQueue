@@ -1,5 +1,6 @@
 package com.leaf.algoqueue.controller;
 
+import com.leaf.algoqueue.common.dto.CodeUpdateRequest;
 import com.leaf.algoqueue.common.dto.MemoUpdateRequest;
 import com.leaf.algoqueue.common.dto.SolveHistoryCreateRequest;
 import com.leaf.algoqueue.common.dto.SolveHistoryResponse;
@@ -89,6 +90,19 @@ public class SolveHistoryController {
             @RequestBody MemoUpdateRequest request
     ) {
         return ResponseEntity.ok(solveHistoryService.updateMemo(userId, id, request));
+    }
+
+    /**
+     * PUT /api/users/{userId}/solve-histories/{id}/code
+     * 풀이 코드 수정
+     */
+    @PutMapping("/{id}/code")
+    public ResponseEntity<SolveHistoryResponse> updateSourceCode(
+            @PathVariable Long userId,
+            @PathVariable Long id,
+            @RequestBody CodeUpdateRequest request
+    ) {
+        return ResponseEntity.ok(solveHistoryService.updateSourceCode(userId, id, request));
     }
 
     /**

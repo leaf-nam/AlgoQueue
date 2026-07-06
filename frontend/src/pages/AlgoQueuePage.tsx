@@ -27,6 +27,7 @@ export default function AlgoQueuePage() {
   // Modals
   const [recordModal, setRecordModal] = useState(false);
   const [memoTarget, setMemoTarget] = useState<SolveHistory | null>(null);
+  const [codeTarget, setCodeTarget] = useState<SolveHistory | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<SolveHistory | null>(null);
 
   const [form, setForm] = useState({
@@ -35,8 +36,10 @@ export default function AlgoQueuePage() {
     success: true,
     elapsedTime: 0,
     memo: "",
+    sourceCode: "",
   });
   const [newMemo, setNewMemo] = useState("");
+  const [newCode, setNewCode] = useState("");
   const { toast } = useToast();
 
   const load = () => {
@@ -68,12 +71,35 @@ export default function AlgoQueuePage() {
         success: form.success,
         elapsedTime: form.elapsedTime,
         memo: form.memo || undefined,
+        sourceCode: form.sourceCode || undefined,
       });
       toast("풀이가 기록되었습니다.", "success");
       setRecordModal(false);
       load();
     } catch (e: any) {
       toast(e.message, "error");
+    }
+  };
+
+  const submitCode = async () => {
+    if (!codeTarget) return;
+    try {
+      await api.history.updateCode(USER_ID, codeTarget.id, newCode);
+      toast("풀이 코드가 저장되었습니다.", "success");
+      setCodeTarget(null);
+      load();
+    } catch (e: any) {
+      toast(e.message, "error");
+    }
+  };
+
+  const copyCode = async () => {
+    if (!newCode) return;
+    try {
+      await navigator.clipboard.writeText(newCode);
+      toast("코드를 복사했습니다.", "success");
+    } catch {
+      toast("브라우저에서 클립보드 접근을 허용하지 않았습니다.", "error");
     }
   };
 
@@ -115,6 +141,7 @@ export default function AlgoQueuePage() {
               success: true,
               elapsedTime: 0,
               memo: "",
+              sourceCode: "",
             });
             setRecordModal(true);
           }}
@@ -164,6 +191,7 @@ export default function AlgoQueuePage() {
                   <th>시간</th>
                   <th>날짜</th>
                   <th>회고</th>
+                  <th>코드</th>
                   <th>액션</th>
                 </tr>
               </thead>
@@ -193,6 +221,17 @@ export default function AlgoQueuePage() {
                       {h.memo ?? (
                         <span style={{ color: "var(--text-muted)" }}>—</span>
                       )}
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => {
+                          setCodeTarget(h);
+                          setNewCode(h.sourceCode ?? "");
+                        }}
+                      >
+                        {h.sourceCode ? "보기" : "저장"}
+                      </button>
                     </td>
                     <td>
                       <div className="flex gap-2">
@@ -308,6 +347,17 @@ export default function AlgoQueuePage() {
                 placeholder="풀이 후 느낀 점, 개선할 점..."
               />
             </div>
+            <div className="form-group">
+              <label className="form-label">풀이 코드 (선택)</label>
+              <textarea
+                className="form-textarea code-textarea"
+                value={form.sourceCode}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, sourceCode: e.target.value }))
+                }
+                placeholder="다른 플랫폼에서 제출한 코드를 붙여넣으세요."
+              />
+            </div>
             <div className="form-actions">
               <button
                 className="btn btn-ghost"
@@ -341,6 +391,32 @@ export default function AlgoQueuePage() {
               취소
             </button>
             <button className="btn btn-primary" onClick={submitMemo}>
+              저장
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {codeTarget && (
+        <Modal title="풀이 코드" onClose={() => setCodeTarget(null)}>
+          <p className="text-muted text-sm">{codeTarget.problemTitle}</p>
+          <textarea
+            className="form-textarea code-textarea"
+            value={newCode}
+            onChange={(e) => setNewCode(e.target.value)}
+            placeholder="다른 플랫폼에서 제출한 코드를 붙여넣으세요."
+          />
+          <div className="form-actions">
+            <button className="btn btn-ghost" onClick={copyCode}>
+              복사
+            </button>
+            <button
+              className="btn btn-ghost"
+              onClick={() => setCodeTarget(null)}
+            >
+              취소
+            </button>
+            <button className="btn btn-primary" onClick={submitCode}>
               저장
             </button>
           </div>

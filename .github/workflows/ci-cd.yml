@@ -1,0 +1,133 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - "3-feat**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  backend-ci:
+    name: Backend Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Build backend
+        run: ./gradlew build --no-daemon
+
+  frontend-ci:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+  docker-publish:
+    name: Publish Docker Images
+    runs-on: ubuntu-latest
+    needs:
+      - backend-ci
+      - frontend-ci
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            1eaf/algoqueue-backend:latest
+            1eaf/algoqueue-backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            1eaf/algoqueue-frontend:latest
+            1eaf/algoqueue-frontend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_APP_DIR: ${{ secrets.EC2_APP_DIR }}
+        run: |
+          if [ -z "$EC2_HOST" ] || [ -z "$EC2_USER" ] || [ -z "$EC2_SSH_KEY" ]; then
+            echo "EC2 secrets are not configured. Skipping deploy."
+            exit 0
+          fi
+
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_KEY" > ~/.ssh/algoqueue
+          chmod 600 ~/.ssh/algoqueue
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+          DEPLOY_DIR="${EC2_APP_DIR:-/home/$EC2_USER/algoqueue}"
+
+          ssh -i ~/.ssh/algoqueue "$EC2_USER@$EC2_HOST" << EOF
+            set -e
+            cd "$DEPLOY_DIR"
+            docker compose pull
+            docker compose up -d
+          EOF

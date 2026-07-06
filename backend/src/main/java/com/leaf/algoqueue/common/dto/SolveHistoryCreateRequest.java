@@ -27,6 +27,8 @@ public class SolveHistoryCreateRequest {
 
     private String memo;
 
+    private String sourceCode;
+
     // null이면 서버에서 현재 시각으로 세팅
     private LocalDateTime solvedAt;
 }

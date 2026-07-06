@@ -49,6 +49,9 @@ public class SolveHistory {
     @Column(columnDefinition = "TEXT")
     private String memo;
 
+    @Column(columnDefinition = "TEXT")
+    private String sourceCode;
+
     /** 풀이 일시 — 추천 3순위: solved_at <= NOW() - 3일, 4순위: 가장 오래된 순 */
     @Column(nullable = false)
     private LocalDateTime solvedAt;
@@ -56,17 +59,22 @@ public class SolveHistory {
     @Builder
     public SolveHistory(User user, Problem problem, Language language,
                         boolean success, Integer elapsedTime,
-                        String memo, LocalDateTime solvedAt) {
+                        String memo, String sourceCode, LocalDateTime solvedAt) {
         this.user = user;
         this.problem = problem;
         this.language = language;
         this.success = success;
         this.elapsedTime = elapsedTime;
         this.memo = memo;
+        this.sourceCode = sourceCode;
         this.solvedAt = solvedAt != null ? solvedAt : LocalDateTime.now();
     }
 
     public void updateMemo(String memo) {
         this.memo = memo;
+    }
+
+    public void updateSourceCode(String sourceCode) {
+        this.sourceCode = sourceCode;
     }
 }

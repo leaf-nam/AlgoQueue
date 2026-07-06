@@ -22,6 +22,7 @@ export default function SolvePage() {
     success: true,
     elapsedTime: 0,
     memo: "",
+    sourceCode: "",
   });
 
   const { toast } = useToast();
@@ -79,6 +80,7 @@ export default function SolvePage() {
         success: true,
         elapsedTime: res.elapsedMinutes,
         memo: "",
+        sourceCode: "",
       });
       setRecordModal(true);
       toast(`풀이 시간: ${fmtTime(res.elapsedMinutes)}`, "info");
@@ -101,6 +103,7 @@ export default function SolvePage() {
         success: form.success,
         elapsedTime: form.elapsedTime,
         memo: form.memo || undefined,
+        sourceCode: form.sourceCode || undefined,
       });
       toast("풀이가 성공적으로 기록되었습니다.", "success");
       setRecordModal(false);
@@ -234,6 +237,17 @@ export default function SolvePage() {
                   setForm((f) => ({ ...f, memo: e.target.value }))
                 }
                 placeholder="풀이 후 느낀 점, 개선할 점..."
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">풀이 코드 (선택)</label>
+              <textarea
+                className="form-textarea code-textarea"
+                value={form.sourceCode}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, sourceCode: e.target.value }))
+                }
+                placeholder="다른 플랫폼에서 제출한 코드를 붙여넣으세요."
               />
             </div>
             <div className="form-actions">

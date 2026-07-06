@@ -432,6 +432,14 @@ tbody td.primary {
   resize: vertical;
   min-height: 80px;
 }
+.code-textarea {
+  min-height: 240px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre;
+  overflow: auto;
+}
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -462,6 +470,8 @@ tbody td.primary {
   padding: 24px;
   width: 480px;
   max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
