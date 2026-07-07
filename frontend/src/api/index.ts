@@ -19,7 +19,7 @@ import type {
 } from "../types";
 import { authEvent } from "../auth/AuthEvent";
 
-const BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 async function req<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
