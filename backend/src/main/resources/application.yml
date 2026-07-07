@@ -36,7 +36,7 @@ spring:
 server:
   servlet:
     session:
-      timeout: 24h
+      timeout: ${SESSION_TIMEOUT}
 
 logging:
   level:
