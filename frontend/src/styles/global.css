@@ -525,6 +525,19 @@ tbody td.primary {
 .timer-controls {
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+.timer-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  animation: timer-blink 1.2s ease-in-out infinite;
+  margin-left: 4px;
+}
+@keyframes timer-blink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--danger-dim); }
+  50% { opacity: 0.3; box-shadow: none; }
 }
 
 /* ─── Recommend Cards ─────────────────────────────────────────────────────── */
