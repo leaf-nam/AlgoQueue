@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: algoqueue-test
+  jpa:
+    database: h2
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: true
+        default_batch_fetch_size: 10
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  mail:
+    host: localhost
+    port: 3025
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+  session:
+    store-type: none
+
+server:
+  servlet:
+    session:
+      timeout: 60
+
+logging:
+  level:
+    root: warn
+    com.leaf.algoqueue: debug
