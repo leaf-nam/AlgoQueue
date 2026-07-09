@@ -4,8 +4,6 @@ import type {
   ProblemSetting,
   SolveHistory,
   RecommendProblem,
-  TimerStartResponse,
-  TimerStopResponse,
   User,
   Platform,
   Language,
@@ -19,7 +17,7 @@ import type {
 } from "../types";
 import { authEvent } from "../auth/AuthEvent";
 
-const BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+const BASE = "";
 
 async function req<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -31,7 +29,7 @@ async function req<T>(path: string, options?: RequestInit): Promise<T> {
     ...options,
   });
 
-  if (res.status === 403) {
+  if (res.status === 401) {
     authEvent.emitUnauthenticated();
     throw new Error("인증이 만료되었습니다.");
   }
@@ -232,20 +230,6 @@ export const api = {
   recommend: {
     list: (userId: number) =>
       req<RecommendProblem[]>(`/api/users/${userId}/problems/recommend`),
-  },
-
-  // ─── Timer ──────────────────────────────────────────────────────────────────
-  timer: {
-    start: (userId: number, problemId: number) =>
-      req<TimerStartResponse>("/api/timer/start", {
-        method: "POST",
-        body: JSON.stringify({ userId, problemId }),
-      }),
-    stop: (timerKey: string) =>
-      req<TimerStopResponse>("/api/timer/stop", {
-        method: "POST",
-        body: JSON.stringify({ timerKey }),
-      }),
   },
 
   auth: {

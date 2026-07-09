@@ -4,7 +4,7 @@ spring:
   jpa:
     database: mysql
     hibernate:
-      ddl-auto: ${MYSQL_DDL_AUTO}
+      ddl-auto: ${MYSQL_DDL_AUTO:update}
     properties:
       hibernate:
         show_sql: true

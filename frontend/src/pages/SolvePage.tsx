@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../api";
 import type { Problem, Language } from "../types/index";
-import { Modal, fmtTime, LANG_LABEL } from "../components/shared";
+import { Modal, LANG_LABEL } from "../components/shared";
 import { useToast } from "../hooks/useToast";
 
 const USER_ID = 1;
@@ -9,7 +9,7 @@ const LANGS: Language[] = ["JAVA", "CPP", "PYTHON", "KOTLIN"];
 
 export default function SolvePage() {
   const [problems, setProblems] = useState<Problem[]>([]);
-  const [timerKey, setTimerKey] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0); // seconds
   const [timerProblem, setTP] = useState<number | "">("");
   const intervalRef = useRef<number | undefined>(undefined);
@@ -28,7 +28,6 @@ export default function SolvePage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // 문제 리스트만 로드
     api.problems
       .list({ hidden: false })
       .then((p) => setProblems(p))
@@ -54,44 +53,38 @@ export default function SolvePage() {
       : `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
-  const startTimer = async () => {
+  const startTimer = (reset = true) => {
     if (!timerProblem) return toast("문제를 선택하세요.", "error");
-    try {
-      const res = await api.timer.start(USER_ID, Number(timerProblem));
-      setTimerKey(res.timerKey);
-      setElapsed(0);
-      intervalRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
-      toast("타이머 시작", "success");
-    } catch (e: any) {
-      toast(e.message, "error");
-    }
+    if (reset) setElapsed(0);
+    setRunning(true);
+    intervalRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+    toast("타이머 시작", "success");
   };
 
-  const stopTimer = async () => {
-    if (!timerKey) return;
+  const stopTimer = () => {
+    if (!running) return;
     clearInterval(intervalRef.current);
-    try {
-      const res = await api.timer.stop(timerKey);
-      setTimerKey(null);
-      // 풀이 기록 모달 오픈 및 시간 입력 prefilled
-      setForm({
-        problemId: Number(timerProblem),
-        language: "JAVA",
-        success: true,
-        elapsedTime: res.elapsedMinutes,
-        memo: "",
-        sourceCode: "",
-      });
-      setRecordModal(true);
-      toast(`풀이 시간: ${fmtTime(res.elapsedMinutes)}`, "info");
-    } catch (e: any) {
-      toast(e.message, "error");
-    }
+    setRunning(false);
+    toast("타이머 정지", "info");
+  };
+
+  const openRecordModal = () => {
+    if (running) return;
+    const elapsedMinutes = Math.floor(elapsed / 60);
+    setForm({
+      problemId: Number(timerProblem),
+      language: "JAVA",
+      success: true,
+      elapsedTime: elapsedMinutes,
+      memo: "",
+      sourceCode: "",
+    });
+    setRecordModal(true);
   };
 
   const resetTimer = () => {
     clearInterval(intervalRef.current);
-    setTimerKey(null);
+    setRunning(false);
     setElapsed(0);
   };
 
@@ -135,7 +128,7 @@ export default function SolvePage() {
             onChange={(e) =>
               setTP(e.target.value ? Number(e.target.value) : "")
             }
-            disabled={!!timerKey}
+            disabled={running}
           >
             <option value="">문제 선택</option>
             {problems.map((p) => (
@@ -144,19 +137,29 @@ export default function SolvePage() {
               </option>
             ))}
           </select>
-          {!timerKey ? (
-            <button className="btn btn-primary" onClick={startTimer}>
-              ▶ 시작
-            </button>
-          ) : (
+{running ? (
             <>
               <button className="btn btn-danger" onClick={stopTimer}>
-                ■ 정지 & 기록
+                ■ 정지
+              </button>
+              <span className="timer-pulse" />
+            </>
+          ) : elapsed > 0 ? (
+            <>
+              <button className="btn btn-primary" onClick={openRecordModal}>
+                기록
+              </button>
+              <button className="btn btn-ghost" onClick={() => startTimer(false)}>
+                ▶ 재시작
               </button>
               <button className="btn btn-ghost" onClick={resetTimer}>
                 ↺ 리셋
               </button>
             </>
+          ) : (
+            <button className="btn btn-primary" onClick={() => startTimer()}>
+              ▶ 시작
+            </button>
           )}
         </div>
       </div>

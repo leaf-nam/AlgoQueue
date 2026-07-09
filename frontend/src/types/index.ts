@@ -84,22 +84,6 @@ export interface RecommendProblem {
   categoryName: string;
 }
 
-// ─── Timer ────────────────────────────────────────────────────────────────────
-export interface TimerStartResponse {
-  timerKey: string;
-  userId: number;
-  problemId: number;
-  startedAt: string;
-}
-
-export interface TimerStopResponse {
-  userId: number;
-  problemId: number;
-  startedAt: string;
-  stoppedAt: string;
-  elapsedMinutes: number;
-}
-
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 export interface LoginRequest {
