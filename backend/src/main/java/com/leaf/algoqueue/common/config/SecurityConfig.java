@@ -29,6 +29,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final SecurityContextRepository securityContextRepository;
 
     @Bean
     public SecurityFilterChain filterChain(
@@ -38,6 +39,9 @@ public class SecurityConfig {
         return http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
+                .securityContext(securityContext ->
+                        securityContext.securityContextRepository(securityContextRepository)
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**")
                         .permitAll()
