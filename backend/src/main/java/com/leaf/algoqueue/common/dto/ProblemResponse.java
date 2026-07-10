@@ -16,6 +16,7 @@ public class ProblemResponse {
     private Platform platform;
     private String problemNumber;
     private String title;
+    private String url;
     private Difficulty difficulty;
     private Long categoryId;
     private String categoryName;
@@ -28,6 +29,7 @@ public class ProblemResponse {
                 .platform(problem.getPlatform())
                 .problemNumber(problem.getProblemNumber())
                 .title(problem.getTitle())
+                .url(problem.getUrl().toString())
                 .difficulty(problem.getDifficulty())
                 .categoryId(problem.getCategory().getId())
                 .categoryName(problem.getCategory().getName())

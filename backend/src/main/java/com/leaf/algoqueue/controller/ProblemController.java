@@ -67,7 +67,7 @@ public class ProblemController {
 
             return ResponseEntity.created(location).body(response);
 
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
@@ -85,7 +85,7 @@ public class ProblemController {
 
             return ResponseEntity.ok(problemService.updateProblem(id, request));
 
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }

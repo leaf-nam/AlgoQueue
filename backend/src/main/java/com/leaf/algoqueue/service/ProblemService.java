@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.List;
 
 @Service
@@ -51,6 +52,8 @@ public class ProblemService {
                             .formatted(req.getPlatform(), req.getProblemNumber()));
         }
 
+        validatePlatformUrl(req.getUrl(), req.getPlatform());
+
         Category category = findCategoryById(req.getCategoryId());
 
         Problem problem = Problem.builder()
@@ -74,6 +77,10 @@ public class ProblemService {
     public ProblemResponse updateProblem(Long id, ProblemUpdateRequest req) throws MalformedURLException {
         Problem problem = findProblemById(id);
         Category category = findCategoryById(req.getCategoryId());
+
+        if (req.getUrl() != null) {
+            validatePlatformUrl(req.getUrl(), problem.getPlatform());
+        }
 
         problem.update(req.getTitle(), req.getUrl(), req.getDifficulty(), category);
 
@@ -109,5 +116,18 @@ public class ProblemService {
     private Category findCategoryById(Long id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("카테고리를 찾을 수 없습니다. id=" + id));
+    }
+
+    private void validatePlatformUrl(String urlString, Platform platform) throws MalformedURLException {
+        String host = URI.create(urlString).toURL().getHost();
+
+        boolean matched = platform.getDomains().stream()
+                .anyMatch(domain -> host.equals(domain) || host.endsWith("." + domain));
+
+        if (!matched) {
+            throw new IllegalArgumentException(
+                    "%s 플랫폼의 올바른 URL이 아닙니다. 허용 도메인: %s"
+                            .formatted(platform.name(), String.join(", ", platform.getDomains())));
+        }
     }
 }
