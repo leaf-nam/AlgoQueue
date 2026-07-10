@@ -4,7 +4,6 @@ import {
   useState,
   useEffect,
   useCallback,
-  useRef,
   type ReactNode,
 } from "react";
 import { authEvent } from "./AuthEvent";
@@ -33,16 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const handlingRef = useRef(false);
 
   const handleUnauthenticated = (reason: string) => {
-    if (handlingRef.current) return;
-    handlingRef.current = true;
     toast(reason, "error");
-    setTimeout(() => {
-      setUser(null);
-      localStorage.removeItem(USER_KEY);
-    }, 1500);
+    setUser(null);
+    localStorage.removeItem(USER_KEY);
   };
 
   // Restore session on first mount
@@ -63,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback((user: AuthUser) => {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
-
+    authEvent.reset();
     setUser(user);
   }, []);
 
