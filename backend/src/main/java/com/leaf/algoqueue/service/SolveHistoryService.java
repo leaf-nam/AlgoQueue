@@ -56,6 +56,14 @@ public class SolveHistoryService {
         Problem problem = problemRepository.findById(req.getProblemId())
                 .orElseThrow(() -> new EntityNotFoundException("문제를 찾을 수 없습니다. id=" + req.getProblemId()));
 
+        // 동일 사용자가 동일 문제를 1분 이내에 중복 기록하는 것을 방지
+        solveHistoryRepository.findTopByUserIdAndProblemIdOrderBySolvedAtDesc(userId, req.getProblemId())
+                .ifPresent(last -> {
+                    if (last.getSolvedAt().isAfter(LocalDateTime.now().minusMinutes(1))) {
+                        throw new IllegalStateException("동일 문제를 1분 이내에 중복 기록할 수 없습니다.");
+                    }
+                });
+
         SolveHistory history = SolveHistory.builder()
                 .user(user)
                 .problem(problem)

@@ -54,4 +54,7 @@ public interface SolveHistoryRepository extends JpaRepository<SolveHistory, Long
         where sh.user.id = :userId
     """)
     List<Long> findSolvedProblemIdsByUserId(Long userId);
+
+    Optional<SolveHistory> findTopByUserIdAndProblemIdOrderBySolvedAtDesc(
+            Long userId, Long problemId);
 }
