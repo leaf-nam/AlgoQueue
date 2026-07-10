@@ -113,7 +113,7 @@ class ProblemServiceTest {
             setField(req, "platform", Platform.PROGRAMMERS);
             setField(req, "problemNumber", "1");
             setField(req, "title", "새 문제");
-            setField(req, "url", "https://example.com");
+            setField(req, "url", "https://school.programmers.co.kr/learn/courses/30/lessons/1");
             setField(req, "difficulty", Difficulty.MEDIUM);
             setField(req, "categoryId", 1L);
             setField(req, "hidden", false);
@@ -150,7 +150,7 @@ class ProblemServiceTest {
 
             ProblemUpdateRequest req = new ProblemUpdateRequest();
             setField(req, "title", "수정된 제목");
-            setField(req, "url", "https://example.com/2");
+            setField(req, "url", "https://school.programmers.co.kr/learn/courses/30/lessons/2");
             setField(req, "difficulty", Difficulty.HARD);
             setField(req, "categoryId", 1L);
 
