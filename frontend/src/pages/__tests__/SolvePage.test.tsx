@@ -9,12 +9,20 @@ vi.mock("../../api", () => ({
     problems: {
       list: vi.fn(),
     },
+    categories: {
+      list: vi.fn(),
+    },
     history: {
+      list: vi.fn(),
       create: vi.fn(),
     },
   },
   resetAuthErrorFlag: vi.fn(),
 }));
+
+const mockCategories = [
+  { id: 1, name: "Array", hidden: false, problemCount: 2 },
+];
 
 beforeEach(() => {
   vi.useFakeTimers({ shouldAdvanceTime: true });
@@ -23,6 +31,8 @@ beforeEach(() => {
     { id: 1, title: "Two Sum", platform: "LEETCODE", problemNumber: "1", url: "", difficulty: null, categoryId: 1, categoryName: "Array", hidden: false, createdAt: "2026-01-01" },
     { id: 2, title: "Valid Parentheses", platform: "LEETCODE", problemNumber: "20", url: "", difficulty: "EASY", categoryId: 2, categoryName: "Stack", hidden: false, createdAt: "2026-01-01" },
   ]);
+  vi.mocked(api.categories.list).mockResolvedValue(mockCategories);
+  vi.mocked(api.history.list).mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -47,9 +57,11 @@ describe("SolvePage - Timer", () => {
     expect(await screen.findByText("Valid Parentheses")).toBeInTheDocument();
   });
 
+  const getProblemSelect = async () => (await screen.findAllByRole("combobox"))[1];
+
   it("starts and stops timer", async () => {
     renderWithProviders(<SolvePage />);
-    const select = await screen.findByRole("combobox");
+    const select = await getProblemSelect();
     fireEvent.change(select, { target: { value: "1" } });
     fireEvent.click(screen.getByText("▶ 시작"));
     expect(await screen.findByText("■ 정지")).toBeInTheDocument();
@@ -61,7 +73,7 @@ describe("SolvePage - Timer", () => {
 
   it("shows 재시작 button after stopping", async () => {
     renderWithProviders(<SolvePage />);
-    const select = await screen.findByRole("combobox");
+    const select = await getProblemSelect();
     fireEvent.change(select, { target: { value: "1" } });
     fireEvent.click(screen.getByText("▶ 시작"));
     expect(await screen.findByText("■ 정지")).toBeInTheDocument();
@@ -72,7 +84,7 @@ describe("SolvePage - Timer", () => {
 
   it("opens record modal when 기록 is clicked", async () => {
     renderWithProviders(<SolvePage />);
-    const select = await screen.findByRole("combobox");
+    const select = await getProblemSelect();
     fireEvent.change(select, { target: { value: "1" } });
     fireEvent.click(screen.getByText("▶ 시작"));
     expect(await screen.findByText("■ 정지")).toBeInTheDocument();
@@ -86,7 +98,7 @@ describe("SolvePage - Timer", () => {
   it("submits record and closes modal", async () => {
     vi.mocked(api.history.create).mockResolvedValue({} as any);
     renderWithProviders(<SolvePage />);
-    const select = await screen.findByRole("combobox");
+    const select = await getProblemSelect();
     fireEvent.change(select, { target: { value: "1" } });
     fireEvent.click(screen.getByText("▶ 시작"));
     expect(await screen.findByText("■ 정지")).toBeInTheDocument();
@@ -102,7 +114,7 @@ describe("SolvePage - Timer", () => {
 
   it("resets timer when 리셋 is clicked", async () => {
     renderWithProviders(<SolvePage />);
-    const select = await screen.findByRole("combobox");
+    const select = await getProblemSelect();
     fireEvent.change(select, { target: { value: "1" } });
     fireEvent.click(screen.getByText("▶ 시작"));
     expect(await screen.findByText("■ 정지")).toBeInTheDocument();
