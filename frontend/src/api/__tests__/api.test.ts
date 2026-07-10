@@ -19,7 +19,7 @@ describe("api.req - error handling", () => {
 
     await expect(
       api.problems.list({ hidden: false }),
-    ).rejects.toThrow("인증이 만료되었습니다.");
+    ).rejects.toThrow("인증이 필요합니다.");
   });
 
   it("re-throws error text on non-ok status", async () => {

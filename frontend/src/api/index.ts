@@ -30,8 +30,13 @@ async function req<T>(path: string, options?: RequestInit): Promise<T> {
   });
 
   if (res.status === 401) {
-    authEvent.emitUnauthenticated();
-    throw new Error("인증이 만료되었습니다.");
+    authEvent.emitUnauthenticated("인증이 필요합니다. 로그인 페이지로 이동합니다.");
+    throw new Error("인증이 필요합니다.");
+  }
+
+  if (res.status === 403) {
+    authEvent.emitUnauthenticated("접근 권한이 없습니다. 로그인 페이지로 이동합니다.");
+    throw new Error("접근 권한이 없습니다.");
   }
 
   if (!res.ok) {

@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { authEvent } from "./AuthEvent";
+import { useToast } from "../hooks/useToast";
 // ── Types ──────────────────────────────────────────────────
 export interface AuthUser {
   id: number;
@@ -30,10 +31,14 @@ const USER_KEY = "aq_user";
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  const handleUnauthenticated = () => {
-    setUser(null);
-    localStorage.removeItem(USER_KEY);
+  const handleUnauthenticated = (reason: string) => {
+    toast(reason, "error");
+    setTimeout(() => {
+      setUser(null);
+      localStorage.removeItem(USER_KEY);
+    }, 1500);
   };
 
   // Restore session on first mount

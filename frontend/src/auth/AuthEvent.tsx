@@ -1,15 +1,13 @@
-type AuthCallback = () => void;
+type AuthCallback = (reason: string) => void;
 let onUnauthenticatedCallback: AuthCallback | null = null;
 
 export const authEvent = {
-  // 403 발생 시 호출할 함수 등록
   subscribe(callback: AuthCallback) {
     onUnauthenticatedCallback = callback;
   },
-  // 403 발생 시 실행
-  emitUnauthenticated() {
+  emitUnauthenticated(reason: string = "인증이 필요합니다.") {
     if (onUnauthenticatedCallback) {
-      onUnauthenticatedCallback();
+      onUnauthenticatedCallback(reason);
     }
   },
 };
