@@ -48,6 +48,8 @@ export default function ProblemsPage() {
   const [modal, setModal] = useState<"create" | "edit" | null>(null);
   const [editing, setEditing] = useState<Problem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Problem | null>(null);
+  const [showNewCat, setShowNewCat] = useState(false);
+  const [newCatName, setNewCatName] = useState("");
   const { toast } = useToast();
 
   const [form, setForm] = useState({
@@ -93,6 +95,8 @@ export default function ProblemsPage() {
       hidden: false,
     });
     setEditing(null);
+    setShowNewCat(false);
+    setNewCatName("");
     setModal("create");
   };
 
@@ -133,6 +137,8 @@ export default function ProblemsPage() {
         toast("문제가 수정되었습니다.", "success");
       }
       setModal(null);
+      setShowNewCat(false);
+      setNewCatName("");
       load();
     } catch (e: any) {
       toast(e.message, "error");
@@ -143,6 +149,21 @@ export default function ProblemsPage() {
     try {
       await api.problems.toggleHidden(p.id);
       load();
+    } catch (e: any) {
+      toast(e.message, "error");
+    }
+  };
+
+  const createCategory = async () => {
+    const name = newCatName.trim();
+    if (!name) return;
+    try {
+      const cat = await api.categories.create(name);
+      setCategories((prev) => [...prev, cat]);
+      setForm((f) => ({ ...f, categoryId: cat.id }));
+      setNewCatName("");
+      setShowNewCat(false);
+      toast("카테고리가 추가되었습니다.", "success");
     } catch (e: any) {
       toast(e.message, "error");
     }
@@ -301,7 +322,11 @@ export default function ProblemsPage() {
       {modal && (
         <Modal
           title={modal === "create" ? "문제 등록" : "문제 수정"}
-          onClose={() => setModal(null)}
+          onClose={() => {
+            setModal(null);
+            setShowNewCat(false);
+            setNewCatName("");
+          }}
         >
           <div className="flex flex-col gap-3">
             {modal === "create" && (
@@ -364,23 +389,66 @@ export default function ProblemsPage() {
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">카테고리</label>
-                <select
-                  className="form-select"
-                  value={form.categoryId}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      categoryId: Number(e.target.value),
-                    }))
-                  }
-                >
-                  <option value="">선택</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <select
+                    className="form-select"
+                    value={form.categoryId}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        categoryId: Number(e.target.value),
+                      }))
+                    }
+                  >
+                    <option value="">선택</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    className="btn btn-icon btn-sm"
+                    title="새 카테고리 추가"
+                    onClick={() => setShowNewCat(true)}
+                    style={{ flexShrink: 0 }}
+                  >
+                    +
+                  </button>
+                </div>
+                {showNewCat && (
+                  <div className="flex gap-2" style={{ marginTop: 6 }}>
+                    <input
+                      className="form-input"
+                      value={newCatName}
+                      onChange={(e) => setNewCatName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") createCategory();
+                        if (e.key === "Escape") {
+                          setShowNewCat(false);
+                          setNewCatName("");
+                        }
+                      }}
+                      placeholder="새 카테고리명"
+                      autoFocus
+                    />
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={createCategory}
+                    >
+                      추가
+                    </button>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => {
+                        setShowNewCat(false);
+                        setNewCatName("");
+                      }}
+                    >
+                      취소
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">난이도 (공식)</label>
