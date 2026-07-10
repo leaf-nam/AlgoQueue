@@ -13,6 +13,7 @@ vi.mock("../../api", () => ({
       create: vi.fn(),
     },
   },
+  resetAuthErrorFlag: vi.fn(),
 }));
 
 beforeEach(() => {
