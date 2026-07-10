@@ -13,6 +13,7 @@ export default function SolvePage() {
   const [elapsed, setElapsed] = useState(0); // seconds
   const [timerProblem, setTP] = useState<number | "">("");
   const intervalRef = useRef<number | undefined>(undefined);
+  const submittingRef = useRef(false);
 
   // Record Modal (타이머 중지 후 기록용)
   const [recordModal, setRecordModal] = useState(false);
@@ -89,6 +90,8 @@ export default function SolvePage() {
   };
 
   const submitRecord = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     try {
       await api.history.create(USER_ID, {
         problemId: Number(form.problemId),
@@ -104,6 +107,8 @@ export default function SolvePage() {
       setElapsed(0);
     } catch (e: any) {
       toast(e.message, "error");
+    } finally {
+      submittingRef.current = false;
     }
   };
 

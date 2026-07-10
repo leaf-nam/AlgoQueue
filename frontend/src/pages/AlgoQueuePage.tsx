@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../api";
 import type { SolveHistory, Problem, Language } from "../types/index";
 import {
@@ -40,6 +40,7 @@ export default function AlgoQueuePage() {
   });
   const [newMemo, setNewMemo] = useState("");
   const [newCode, setNewCode] = useState("");
+  const submittingRef = useRef(false);
   const { toast } = useToast();
 
   const load = () => {
@@ -64,6 +65,8 @@ export default function AlgoQueuePage() {
   }, [filterSuccess, filterLang]);
 
   const submitRecord = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     try {
       await api.history.create(USER_ID, {
         problemId: Number(form.problemId),
@@ -78,6 +81,8 @@ export default function AlgoQueuePage() {
       load();
     } catch (e: any) {
       toast(e.message, "error");
+    } finally {
+      submittingRef.current = false;
     }
   };
 
