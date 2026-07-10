@@ -151,7 +151,7 @@ export default function SolvePage() {
 
   // ─── View code ─────────────────────────────────────────────────────────────
   const tryViewCode = (h: SolveHistory) => {
-    if (running) {
+    if (running || elapsed > 0) {
       setPendingCodeView(h);
       setCodeWarnModal(true);
     } else {
@@ -160,14 +160,14 @@ export default function SolvePage() {
   };
 
   const confirmCodeView = () => {
-    stopTimer();
+    clearInterval(intervalRef.current);
     setRunning(false);
     setCodeWarnModal(false);
     if (pendingCodeView) {
       setCodeTarget(pendingCodeView);
       setPendingCodeView(null);
     }
-    toast("타이머가 중지되었습니다. 기존 코드를 확인하세요.", "info");
+    toast("이번 풀이가 실패 처리되었습니다. 기존 코드를 확인하세요.", "info");
   };
 
   const cancelCodeView = () => {
@@ -318,7 +318,7 @@ export default function SolvePage() {
       {codeWarnModal && (
         <Modal title="⚠️ 기존 코드 확인" onClose={cancelCodeView}>
           <p style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6 }}>
-            타이머가 실행 중입니다. 기존 코드를 확인하면
+            기존 코드를 확인하면
             <br />이번 풀이는 <strong style={{ color: "var(--danger)" }}>실패</strong>로 처리되며 타이머가 종료됩니다.
             <br />계속하시겠습니까?
           </p>
