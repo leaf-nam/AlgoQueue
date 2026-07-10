@@ -39,7 +39,6 @@ async function req<T>(path: string, options?: RequestInit): Promise<T> {
     if (!handlingAuthError) {
       handlingAuthError = true;
       authEvent.emitUnauthenticated("인증이 필요합니다. 로그인 페이지로 이동합니다.");
-      throw new Error("인증이 필요합니다.");
     }
     return new Promise<T>(() => {});
   }
@@ -48,7 +47,6 @@ async function req<T>(path: string, options?: RequestInit): Promise<T> {
     if (!handlingAuthError) {
       handlingAuthError = true;
       authEvent.emitUnauthenticated("접근 권한이 없습니다. 로그인 페이지로 이동합니다.");
-      throw new Error("접근 권한이 없습니다.");
     }
     return new Promise<T>(() => {});
   }

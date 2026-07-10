@@ -12,14 +12,16 @@ describe("api.req - error handling", () => {
     globalThis.fetch = originalFetch;
   });
 
-  it("emits unauthenticated event on 401", async () => {
+  it("returns a pending promise on 401", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue(
       new Response(null, { status: 401, statusText: "Unauthorized" }),
     );
 
-    await expect(
-      api.problems.list({ hidden: false }),
-    ).rejects.toThrow("인증이 필요합니다.");
+    const result = await Promise.race([
+      api.problems.list({ hidden: false }).then(() => "resolved"),
+      new Promise<string>(resolve => setTimeout(() => resolve("timeout"), 100)),
+    ]);
+    expect(result).toBe("timeout");
   });
 
   it("re-throws error text on non-ok status", async () => {
