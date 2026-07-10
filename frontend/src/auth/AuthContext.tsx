@@ -8,6 +8,7 @@ import {
 } from "react";
 import { authEvent } from "./AuthEvent";
 import { useToast } from "../hooks/useToast";
+import { resetAuthErrorFlag } from "../api";
 // ── Types ──────────────────────────────────────────────────
 export interface AuthUser {
   id: number;
@@ -42,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Restore session on first mount
   useEffect(() => {
     authEvent.subscribe(handleUnauthenticated);
+    resetAuthErrorFlag();
     try {
       const raw = localStorage.getItem(USER_KEY);
       if (raw) {
@@ -57,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback((user: AuthUser) => {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
-    authEvent.reset();
+    resetAuthErrorFlag();
     setUser(user);
   }, []);
 
