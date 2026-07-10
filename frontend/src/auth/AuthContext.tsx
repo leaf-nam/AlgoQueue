@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
 import { authEvent } from "./AuthEvent";
@@ -32,8 +33,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const handlingRef = useRef(false);
 
   const handleUnauthenticated = (reason: string) => {
+    if (handlingRef.current) return;
+    handlingRef.current = true;
     toast(reason, "error");
     setTimeout(() => {
       setUser(null);
