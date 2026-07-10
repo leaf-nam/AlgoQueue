@@ -42,7 +42,7 @@ public class SecurityConfig {
                         securityContext.securityContextRepository(new HttpSessionSecurityContextRepository())
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**")
+                        .requestMatchers("/api/auth/**", "/error")
                         .permitAll()
                         .anyRequest()
                         .authenticated()
