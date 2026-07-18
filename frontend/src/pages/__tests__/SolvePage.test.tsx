@@ -53,11 +53,11 @@ describe("SolvePage - Timer", () => {
 
   it("shows problem options in select", async () => {
     renderWithProviders(<SolvePage />);
-    expect(await screen.findByText("Two Sum")).toBeInTheDocument();
-    expect(await screen.findByText("Valid Parentheses")).toBeInTheDocument();
+    expect(await screen.findByText(/^Two Sum$/)).toBeInTheDocument();
+    expect(await screen.findByText(/^Valid Parentheses \(Easy\)$/)).toBeInTheDocument();
   });
 
-  const getProblemSelect = async () => (await screen.findAllByRole("combobox"))[1];
+  const getProblemSelect = async () => (await screen.findAllByRole("combobox"))[3];
 
   it("starts and stops timer", async () => {
     renderWithProviders(<SolvePage />);

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import type { Problem, Category, Platform, Difficulty } from "../types";
 import {
@@ -39,6 +40,7 @@ const DIFF_LABEL = {
 };
 
 export default function ProblemsPage() {
+  const navigate = useNavigate();
   const [problems, setProblems] = useState<Problem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -258,14 +260,12 @@ export default function ProblemsPage() {
                   <tr key={p.id} style={{ opacity: p.hidden ? 0.5 : 1 }}>
                     <td className="text-mono text-muted">#{p.problemNumber}</td>
                     <td className="primary">
-                      <a
-                        href={p.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-decoration-underline"
+                      <span
+                        style={{ cursor: "pointer", textDecoration: "underline" }}
+                        onClick={() => navigate(`/solve?problemId=${p.id}`)}
                       >
                         {p.title}
-                      </a>
+                      </span>
                       {p.hidden && (
                         <span
                           className="badge badge-neutral"
