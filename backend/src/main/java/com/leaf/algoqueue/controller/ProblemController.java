@@ -1,9 +1,12 @@
 package com.leaf.algoqueue.controller;
 
 import com.leaf.algoqueue.common.dto.ProblemCreateRequest;
+import com.leaf.algoqueue.common.dto.ProblemExtractRequest;
+import com.leaf.algoqueue.common.dto.ProblemExtractResponse;
 import com.leaf.algoqueue.common.dto.ProblemResponse;
 import com.leaf.algoqueue.common.dto.ProblemUpdateRequest;
 import com.leaf.algoqueue.common.enums.Platform;
+import com.leaf.algoqueue.service.ProblemExtractService;
 import com.leaf.algoqueue.service.ProblemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import java.util.List;
 public class ProblemController {
 
     private final ProblemService problemService;
+    private final ProblemExtractService problemExtractService;
 
     /**
      * GET /api/problems
@@ -107,5 +111,20 @@ public class ProblemController {
     public ResponseEntity<Void> deleteProblem(@PathVariable Long id) {
         problemService.deleteProblem(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * POST /api/problems/extract
+     * URL에서 문제 정보 자동 추출
+     */
+    @PostMapping("/extract")
+    public ResponseEntity<ProblemExtractResponse> extractProblem(
+            @Valid @RequestBody ProblemExtractRequest request
+    ) {
+        try {
+            return ResponseEntity.ok(problemExtractService.extract(request.getUrl()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

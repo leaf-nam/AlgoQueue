@@ -12,6 +12,7 @@ import {
   PLATFORM_LABEL,
 } from "../components/shared";
 import { useToast } from "../hooks/useToast";
+import { detectPlatform, extractProblemNumber } from "../lib/url";
 
 const PLATFORMS: Platform[] = [
   "PROGRAMMERS",
@@ -50,6 +51,7 @@ export default function ProblemsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Problem | null>(null);
   const [showNewCat, setShowNewCat] = useState(false);
   const [newCatName, setNewCatName] = useState("");
+  const [extracting, setExtracting] = useState(false);
   const { toast } = useToast();
 
   const [form, setForm] = useState({
@@ -83,6 +85,40 @@ export default function ProblemsPage() {
   useEffect(() => {
     load();
   }, [filterPlatform, filterCat, showHidden]);
+
+  useEffect(() => {
+    if (modal !== "create" || !form.url.trim()) return;
+
+    const timer = setTimeout(async () => {
+      setExtracting(true);
+      try {
+        const platform = detectPlatform(form.url);
+        if (platform) {
+          setForm((f) => {
+            const updates: Partial<typeof f> = { platform };
+            const num = extractProblemNumber(form.url, platform);
+            if (num) updates.problemNumber = num;
+            return { ...f, ...updates };
+          });
+        }
+
+        if (!platform) return;
+
+        const result = await api.problems.extract(form.url);
+        setForm((f) => ({
+          ...f,
+          title: result.title ?? f.title,
+          difficulty: (result.difficulty as Difficulty | "") ?? f.difficulty,
+        }));
+      } catch {
+        // 자동 추출 실패 → 수동 입력 가능
+      } finally {
+        setExtracting(false);
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [form.url, modal]);
 
   const openCreate = () => {
     setForm({
@@ -376,7 +412,14 @@ export default function ProblemsPage() {
               />
             </div>
             <div className="form-group">
-              <label className="form-label">URL</label>
+              <label className="form-label">
+                URL
+                {extracting && (
+                  <span className="text-muted" style={{ marginLeft: 8, fontSize: 12 }}>
+                    추출 중...
+                  </span>
+                )}
+              </label>
               <input
                 className="form-input"
                 value={form.url}

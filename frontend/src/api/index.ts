@@ -146,6 +146,16 @@ export const api = {
       req<Problem>(`/api/problems/${id}/hidden`, { method: "PUT" }),
     delete: (id: number) =>
       req<void>(`/api/problems/${id}`, { method: "DELETE" }),
+    extract: (url: string) =>
+      req<{
+        platform: Platform;
+        problemNumber: string;
+        title: string | null;
+        difficulty: Difficulty | null;
+      }>("/api/problems/extract", {
+        method: "POST",
+        body: JSON.stringify({ url }),
+      }),
   },
 
   // ─── ProblemSetting ─────────────────────────────────────────────────────────
