@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import type { RecommendProblem, SolveHistory } from "../types";
@@ -11,6 +11,7 @@ import {
   fmtDate,
   fmtTime,
 } from "../components/shared";
+import ContributionGraph from "../components/ContributionGraph";
 import { useToast } from "../hooks/useToast";
 
 const USER_ID = 1; // TODO: auth 연동 후 교체
@@ -18,27 +19,35 @@ const USER_ID = 1; // TODO: auth 연동 후 교체
 export default function DashboardPage() {
   const navigate = useNavigate();
   const [recommends, setRecommends] = useState<RecommendProblem[]>([]);
-  const [recent, setRecent] = useState<SolveHistory[]>([]);
+  const [allHistories, setAllHistories] = useState<SolveHistory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ total: 0, pass: 0, fail: 0 });
   const { toast } = useToast();
 
   useEffect(() => {
     Promise.all([api.recommend.list(USER_ID), api.history.list(USER_ID)])
       .then(([rec, hist]) => {
         setRecommends(rec);
-        setRecent(hist.slice(0, 10));
-        setStats({
-          total: hist.length,
-          pass: hist.filter((h) => h.success).length,
-          fail: hist.filter((h) => !h.success).length,
-        });
+        setAllHistories(hist);
       })
       .catch((e) => toast(e.message, "error"))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <Loading />;
+  const recent = allHistories.slice(0, 10);
+  const stats = {
+    total: allHistories.length,
+    pass: allHistories.filter((h) => h.success).length,
+    fail: allHistories.filter((h) => !h.success).length,
+  };
+
+  const dailySolves = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const h of allHistories) {
+      const day = h.solvedAt.slice(0, 10);
+      map[day] = (map[day] ?? 0) + 1;
+    }
+    return map;
+  }, [allHistories]);
 
   const passRate = stats.total
     ? Math.round((stats.pass / stats.total) * 100)
@@ -78,6 +87,12 @@ export default function DashboardPage() {
             {passRate}%
           </div>
         </div>
+      </div>
+
+      {/* Contribution Graph */}
+      <div className="card">
+        <div className="card-title">🌱 풀이 기록</div>
+        <ContributionGraph data={dailySolves} />
       </div>
 
       {/* Recommendations */}
