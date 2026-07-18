@@ -237,16 +237,17 @@ export default function GraphsPage() {
         {dailyData.length === 0 ? (
           <Empty icon="📅" message="선택한 기간에 풀이 기록이 없습니다." />
         ) : (
-          <div className="graph-bar-chart">
+          <div className="graph-bar-chart" style={{ height: 150 }}>
             {dailyData.map((d) => (
               <div
                 key={d.date}
                 className="graph-bar-column"
                 title={`${d.date}: ${d.count} solve${d.count !== 1 ? "s" : ""}`}
               >
+                <div className="graph-bar-col-spacer" />
                 <div
                   className="graph-bar-col-fill"
-                  style={{ height: `${(d.count / maxDaily) * 100}%` }}
+                  style={{ height: Math.max(2, (d.count / maxDaily) * 130) }}
                 />
                 {dailyData.length <= 62 && (
                   <span className="graph-bar-col-label">{d.label}</span>
@@ -337,12 +338,13 @@ export default function GraphsPage() {
         {monthlyData.length === 0 ? (
           <Empty icon="📈" message="데이터 없음" />
         ) : (
-          <div className="graph-bar-chart">
+          <div className="graph-bar-chart" style={{ height: 150 }}>
             {monthlyData.map((m) => (
               <div key={m.label} className="graph-bar-column" title={`${m.label}: ${m.count} solves`}>
+                <div className="graph-bar-col-spacer" />
                 <div
                   className="graph-bar-col-fill"
-                  style={{ height: `${(m.count / maxMonthly) * 100}%` }}
+                  style={{ height: Math.max(2, (m.count / maxMonthly) * 130) }}
                 />
                 <span className="graph-bar-col-label">{m.label}</span>
               </div>
@@ -361,7 +363,6 @@ export default function GraphsPage() {
           display: flex;
           align-items: flex-end;
           gap: 2px;
-          min-height: 100px;
           padding-top: 8px;
           overflow-x: auto;
         }
@@ -371,6 +372,10 @@ export default function GraphsPage() {
           align-items: center;
           flex: 1;
           min-width: 6px;
+          height: 100%;
+        }
+        .graph-bar-col-spacer {
+          flex: 1;
         }
         .graph-bar-col-fill {
           width: 100%;
@@ -378,7 +383,7 @@ export default function GraphsPage() {
           max-width: 20px;
           background: var(--accent);
           border-radius: 2px 2px 0 0;
-          transition: height 0.3s ease;
+          flex-shrink: 0;
         }
         .graph-bar-col-fill:hover {
           opacity: 0.8;
