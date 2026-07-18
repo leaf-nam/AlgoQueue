@@ -15,6 +15,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ProblemsPage from "./pages/ProblemsPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import SettingsPage from "./pages/SettingsPage";
+import GraphsPage from "./pages/GraphsPage";
 
 import "./styles/App.css";
 import SolvePage from "./pages/SolvePage";
@@ -52,6 +53,7 @@ function App() {
               <Route path="categories" element={<CategoriesPage />} />
               <Route path="/solve" element={<SolvePage />} />
               <Route path="/queue" element={<AlgoQueuePage />} />
+              <Route path="/graphs" element={<GraphsPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
           </Route>

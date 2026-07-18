@@ -9,6 +9,7 @@ import {
   MdLabel,
   MdSettings,
   MdCode,
+  MdBarChart,
 } from "react-icons/md";
 
 function Navbar() {
@@ -30,6 +31,11 @@ function Navbar() {
         <Link to="/queue" className="nav-item">
           <MdHistory className="nav-icon" />
           알고리즘 큐
+        </Link>
+
+        <Link to="/graphs" className="nav-item">
+          <MdBarChart className="nav-icon" />
+          그래프
         </Link>
 
         <Link to="/" className="nav-item">
