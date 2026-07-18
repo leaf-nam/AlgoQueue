@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import type { RecommendProblem, SolveHistory } from "../types";
 import {
@@ -15,6 +16,7 @@ import { useToast } from "../hooks/useToast";
 const USER_ID = 1; // TODO: auth 연동 후 교체
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [recommends, setRecommends] = useState<RecommendProblem[]>([]);
   const [recent, setRecent] = useState<SolveHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,7 +91,12 @@ export default function DashboardPage() {
         ) : (
           <div className="recommend-grid">
             {recommends.map((p) => (
-              <div className="recommend-card" key={p.problemId}>
+              <div
+                className="recommend-card"
+                key={p.problemId}
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate(`/solve?problemId=${p.problemId}`)}
+              >
                 <div className="recommend-card-title">{p.title}</div>
                 <div className="recommend-card-meta">
                   <PlatformBadge platform={p.platform} />
@@ -125,7 +132,13 @@ export default function DashboardPage() {
               <tbody>
                 {recent.map((h) => (
                   <tr key={h.id}>
-                    <td className="primary">{h.problemTitle}</td>
+                    <td
+                      className="primary"
+                      style={{ cursor: "pointer", textDecoration: "underline" }}
+                      onClick={() => navigate(`/solve?problemId=${h.problemId}`)}
+                    >
+                      {h.problemTitle}
+                    </td>
                     <td>
                       <span className="badge badge-neutral">{h.language}</span>
                     </td>

@@ -1,19 +1,36 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api";
-import type { Problem, Language, Category, SolveHistory } from "../types/index";
-import { Modal, LANG_LABEL, LangBadge, SuccessBadge, fmtDate, fmtTime } from "../components/shared";
+import type { Problem, Language, Category, SolveHistory, Difficulty as DifficultyType } from "../types/index";
+import { Modal, LANG_LABEL, LangBadge, SuccessBadge, DiffBadge, fmtDate, fmtTime, PLATFORM_LABEL } from "../components/shared";
 import { useToast } from "../hooks/useToast";
 
 const USER_ID = 1;
 const LANGS: Language[] = ["JAVA", "CPP", "PYTHON", "KOTLIN"];
+const DIFFS: DifficultyType[] = ["VERY_EASY", "EASY", "MEDIUM", "HARD", "VERY_HARD"];
+const DIFF_LABEL: Record<string, string> = {
+  VERY_EASY: "Very Easy",
+  EASY: "Easy",
+  MEDIUM: "Medium",
+  HARD: "Hard",
+  VERY_HARD: "Very Hard",
+};
+type SortMode = "default" | "difficulty" | "lastSolved";
 
 export default function SolvePage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
   const [problems, setProblems] = useState<Problem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [allHistories, setAllHistories] = useState<SolveHistory[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<number | "">("");
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyType | "">("");
+  const [sortMode, setSortMode] = useState<SortMode>("default");
   const [running, setRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0); // seconds
   const [timerProblem, setTP] = useState<number | "">("");
+  const startTimeRef = useRef(0);
   const intervalRef = useRef<number | undefined>(undefined);
   const submittingRef = useRef(false);
 
@@ -40,18 +57,56 @@ export default function SolvePage() {
     Promise.all([
       api.problems.list({ hidden: false }),
       api.categories.list(false),
-    ]).then(([p, c]) => {
+      api.history.list(USER_ID),
+    ]).then(([p, c, h]) => {
       setProblems(p);
       setCategories(c);
+      setAllHistories(h);
     }).catch((e) => toast(e.message, "error"));
 
     return () => clearInterval(intervalRef.current);
   }, []);
 
-  // Filter problems by selected category
-  const filteredProblems = categoryFilter
-    ? problems.filter((p) => p.categoryId === categoryFilter)
-    : problems;
+  // Auto-select problem from URL query param
+  useEffect(() => {
+    const pid = searchParams.get("problemId");
+    if (pid) {
+      const num = Number(pid);
+      if (num && problems.some((p) => p.id === num)) {
+        setTP(num);
+      }
+    }
+  }, [searchParams, problems]);
+
+  // ─── Filters & sort ─────────────────────────────────────────────────────────
+  const lastSolvedMap = new Map<number, string>();
+  for (const h of allHistories) {
+    const prev = lastSolvedMap.get(h.problemId);
+    if (!prev || h.solvedAt > prev) {
+      lastSolvedMap.set(h.problemId, h.solvedAt);
+    }
+  }
+
+  const filteredProblems = problems
+    .filter((p) => !categoryFilter || p.categoryId === categoryFilter)
+    .filter((p) => !difficultyFilter || p.difficulty === difficultyFilter);
+
+  const sortedProblems = [...filteredProblems].sort((a, b) => {
+    if (sortMode === "difficulty") {
+      const da = a.difficulty ? DIFFS.indexOf(a.difficulty) : -1;
+      const db = b.difficulty ? DIFFS.indexOf(b.difficulty) : -1;
+      return da - db;
+    }
+    if (sortMode === "lastSolved") {
+      const la = lastSolvedMap.get(a.id);
+      const lb = lastSolvedMap.get(b.id);
+      if (la && lb) return lb.localeCompare(la);
+      if (la) return -1;
+      if (lb) return 1;
+      return 0;
+    }
+    return 0;
+  });
 
   // Fetch history when selected problem changes
   useEffect(() => {
@@ -75,6 +130,19 @@ export default function SolvePage() {
   };
 
   // ─── Timer logic ────────────────────────────────────────────────────────────
+  const updateElapsed = useCallback(() => {
+    setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
+  }, []);
+
+  // Recalculate when tab becomes visible again
+  useEffect(() => {
+    const onVisible = () => {
+      if (running) updateElapsed();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [running, updateElapsed]);
+
   const timerClass = () => {
     const min = elapsed / 60;
     if (min >= 60) return "danger";
@@ -94,17 +162,19 @@ export default function SolvePage() {
   const startTimer = (reset = true) => {
     if (!timerProblem) return toast("문제를 선택하세요.", "error");
     if (reset) setElapsed(0);
+    startTimeRef.current = Date.now();
     setRunning(true);
-    intervalRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+    intervalRef.current = setInterval(updateElapsed, 1000);
     toast("타이머 시작", "success");
   };
 
   const stopTimer = useCallback(() => {
     if (!running) return;
+    updateElapsed();
     clearInterval(intervalRef.current);
     setRunning(false);
     toast("타이머 정지", "info");
-  }, [running]);
+  }, [running, updateElapsed]);
 
   const openRecordModal = () => {
     if (running) return;
@@ -191,7 +261,6 @@ export default function SolvePage() {
         <div className="timer-controls">
           <select
             className="form-select"
-            style={{ width: 120 }}
             value={categoryFilter}
             onChange={(e) => {
               setCategoryFilter(e.target.value ? Number(e.target.value) : "");
@@ -206,21 +275,62 @@ export default function SolvePage() {
           </select>
           <select
             className="form-select"
-            style={{ width: 200 }}
+            value={difficultyFilter}
+            onChange={(e) => {
+              setDifficultyFilter(e.target.value as DifficultyType | "");
+              setTP("");
+            }}
+            disabled={running}
+          >
+            <option value="">전체 난이도</option>
+            {DIFFS.map((d) => (
+              <option key={d} value={d}>{DIFF_LABEL[d]}</option>
+            ))}
+          </select>
+          <select
+            className="form-select"
+            value={sortMode}
+            onChange={(e) => setSortMode(e.target.value as SortMode)}
+            disabled={running}
+            style={{ width: 110 }}
+          >
+            <option value="default">기본순</option>
+            <option value="difficulty">난이도순</option>
+            <option value="lastSolved">최근풀이순</option>
+          </select>
+          <select
+            className="form-select"
             value={timerProblem}
             onChange={(e) =>
               setTP(e.target.value ? Number(e.target.value) : "")
             }
             disabled={running}
+            style={{ flex: 1, minWidth: 200 }}
           >
             <option value="">문제 선택</option>
-            {filteredProblems.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.title}
-              </option>
-            ))}
+            {sortedProblems.map((p) => {
+              const lastDate = lastSolvedMap.get(p.id);
+              const suffix = lastDate ? ` · ${fmtDate(lastDate)}` : "";
+              return (
+                <option key={p.id} value={p.id}>
+                  {p.title}{p.difficulty ? ` (${DIFF_LABEL[p.difficulty]})` : ""}{suffix}
+                </option>
+              );
+            })}
           </select>
-{running ? (
+          {timerProblem && !running && (
+            <button
+              className="btn btn-icon"
+              title="문제 링크 열기"
+              onClick={() => {
+                const p = problems.find((x) => x.id === timerProblem);
+                if (p) window.open(p.url, "_blank", "noopener");
+              }}
+            >
+              🔗
+            </button>
+          )}
+          {running ? (
             <>
               <button className="btn btn-danger" onClick={stopTimer}>
                 ■ 정지
