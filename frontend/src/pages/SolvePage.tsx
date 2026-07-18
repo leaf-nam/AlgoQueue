@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../api";
 import type { Problem, Language, Category, SolveHistory, Difficulty as DifficultyType } from "../types/index";
-import { Modal, LANG_LABEL, LangBadge, SuccessBadge, DiffBadge, fmtDate, fmtTime, PLATFORM_LABEL } from "../components/shared";
+import { Modal, LANG_LABEL, LangBadge, SuccessBadge, fmtDate, fmtTime } from "../components/shared";
 import { useToast } from "../hooks/useToast";
 
 const USER_ID = 1;
@@ -18,7 +18,6 @@ const DIFF_LABEL: Record<string, string> = {
 type SortMode = "default" | "difficulty" | "lastSolved";
 
 export default function SolvePage() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const [problems, setProblems] = useState<Problem[]>([]);

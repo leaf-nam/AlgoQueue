@@ -6,7 +6,6 @@ import {
   DiffBadge,
   PlatformBadge,
   SuccessBadge,
-  Loading,
   Empty,
   fmtDate,
   fmtTime,
@@ -20,7 +19,6 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const [recommends, setRecommends] = useState<RecommendProblem[]>([]);
   const [allHistories, setAllHistories] = useState<SolveHistory[]>([]);
-  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -29,8 +27,7 @@ export default function DashboardPage() {
         setRecommends(rec);
         setAllHistories(hist);
       })
-      .catch((e) => toast(e.message, "error"))
-      .finally(() => setLoading(false));
+      .catch((e) => toast(e.message, "error"));
   }, []);
 
   const recent = allHistories.slice(0, 10);
