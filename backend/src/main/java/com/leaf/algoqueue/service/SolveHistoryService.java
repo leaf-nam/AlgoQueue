@@ -4,6 +4,7 @@ import com.leaf.algoqueue.common.dto.CodeUpdateRequest;
 import com.leaf.algoqueue.common.dto.MemoUpdateRequest;
 import com.leaf.algoqueue.common.dto.SolveHistoryCreateRequest;
 import com.leaf.algoqueue.common.dto.SolveHistoryResponse;
+import com.leaf.algoqueue.common.dto.SuccessUpdateRequest;
 import com.leaf.algoqueue.common.enums.Language;
 import com.leaf.algoqueue.repository.ProblemRepository;
 import com.leaf.algoqueue.repository.SolveHistoryRepository;
@@ -93,6 +94,13 @@ public class SolveHistoryService {
     public SolveHistoryResponse updateSourceCode(Long userId, Long id, CodeUpdateRequest req) {
         SolveHistory history = findByIdAndUserId(id, userId);
         history.updateSourceCode(req.getSourceCode());
+        return SolveHistoryResponse.from(history);
+    }
+
+    @Transactional
+    public SolveHistoryResponse updateSuccess(Long userId, Long id, SuccessUpdateRequest req) {
+        SolveHistory history = findByIdAndUserId(id, userId);
+        history.updateSuccess(req.getSuccess());
         return SolveHistoryResponse.from(history);
     }
 

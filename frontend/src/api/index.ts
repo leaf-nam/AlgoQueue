@@ -247,6 +247,11 @@ export const api = {
         method: "PUT",
         body: JSON.stringify({ sourceCode }),
       }),
+    updateSuccess: (userId: number, id: number, success: boolean) =>
+      req<SolveHistory>(`/api/users/${userId}/solve-histories/${id}/success`, {
+        method: "PUT",
+        body: JSON.stringify({ success }),
+      }),
     delete: (userId: number, id: number) =>
       req<void>(`/api/users/${userId}/solve-histories/${id}`, {
         method: "DELETE",

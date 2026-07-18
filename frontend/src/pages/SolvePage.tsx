@@ -36,6 +36,7 @@ export default function SolvePage() {
   // Previous solve history for the selected problem
   const [histories, setHistories] = useState<SolveHistory[]>([]);
   const [codeTarget, setCodeTarget] = useState<SolveHistory | null>(null);
+  const [memoTarget, setMemoTarget] = useState<SolveHistory | null>(null);
   const [codeWarnModal, setCodeWarnModal] = useState(false);
   const [pendingCodeView, setPendingCodeView] = useState<SolveHistory | null>(null);
 
@@ -218,14 +219,22 @@ export default function SolvePage() {
     }
   };
 
-  // ─── View code ─────────────────────────────────────────────────────────────
+  // ─── View code & memo (only after starting) ───────────────────────────────
   const tryViewCode = (h: SolveHistory) => {
-    if (running || elapsed > 0) {
-      setPendingCodeView(h);
-      setCodeWarnModal(true);
-    } else {
-      setCodeTarget(h);
+    if (!running && elapsed === 0) {
+      toast("타이머를 시작한 후에 확인할 수 있습니다.", "info");
+      return;
     }
+    setPendingCodeView(h);
+    setCodeWarnModal(true);
+  };
+
+  const tryViewMemo = (h: SolveHistory) => {
+    if (!running && elapsed === 0) {
+      toast("타이머를 시작한 후에 확인할 수 있습니다.", "info");
+      return;
+    }
+    setMemoTarget(h);
   };
 
   const confirmCodeView = () => {
@@ -392,6 +401,7 @@ export default function SolvePage() {
                     <th>결과</th>
                     <th>시간</th>
                     <th>날짜</th>
+                    <th>회고</th>
                     <th>코드</th>
                   </tr>
                 </thead>
@@ -403,12 +413,18 @@ export default function SolvePage() {
                       <td className="text-mono">{fmtTime(h.elapsedTime)}</td>
                       <td className="text-mono text-muted">{fmtDate(h.solvedAt)}</td>
                       <td>
+                        {h.memo ? (
+                          <button className="btn btn-ghost btn-sm" onClick={() => tryViewMemo(h)}>
+                            회고
+                          </button>
+                        ) : (
+                          <span className="text-muted">—</span>
+                        )}
+                      </td>
+                      <td>
                         {h.sourceCode ? (
-                          <button
-                            className="btn btn-ghost btn-sm"
-                            onClick={() => tryViewCode(h)}
-                          >
-                            코드 보기
+                          <button className="btn btn-ghost btn-sm" onClick={() => tryViewCode(h)}>
+                            코드
                           </button>
                         ) : (
                           <span className="text-muted">—</span>
@@ -452,6 +468,24 @@ export default function SolvePage() {
             <button className="btn btn-ghost" onClick={() => setCodeTarget(null)}>
               닫기
             </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* ── Memo View Modal ── */}
+      {memoTarget && (
+        <Modal title="회고" onClose={() => setMemoTarget(null)}>
+          <p className="text-muted text-sm" style={{ marginBottom: 4 }}>
+            {memoTarget.problemTitle} · {fmtDate(memoTarget.solvedAt)} · {LANG_LABEL[memoTarget.language]}
+          </p>
+          <div
+            className="form-textarea"
+            style={{ whiteSpace: "pre-wrap", minHeight: 80, cursor: "default", background: "var(--bg-surface)" }}
+          >
+            {memoTarget.memo}
+          </div>
+          <div className="form-actions">
+            <button className="btn btn-ghost" onClick={() => setMemoTarget(null)}>닫기</button>
           </div>
         </Modal>
       )}
