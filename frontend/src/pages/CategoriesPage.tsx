@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import type { Category } from "../types/index";
 import { Loading, Empty, Modal, ConfirmModal } from "../components/shared";
 import { useToast } from "../hooks/useToast";
 
 export default function CategoriesPage() {
+  const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showHidden, setShowHidden] = useState(false);
@@ -115,7 +117,14 @@ export default function CategoriesPage() {
               <tbody>
                 {categories.map((c) => (
                   <tr key={c.id} style={{ opacity: c.hidden ? 0.5 : 1 }}>
-                    <td className="primary">{c.name}</td>
+                    <td className="primary">
+                      <span
+                        style={{ cursor: "pointer", textDecoration: "underline" }}
+                        onClick={() => navigate(`/problems?categoryId=${c.id}`)}
+                      >
+                        {c.name}
+                      </span>
+                    </td>
                     <td className="text-mono">{c.problemCount}</td>
                     <td>
                       {c.hidden ? (

@@ -77,4 +77,8 @@ public class SolveHistory {
     public void updateSourceCode(String sourceCode) {
         this.sourceCode = sourceCode;
     }
+
+    public void updateSuccess(boolean success) {
+        this.success = success;
+    }
 }

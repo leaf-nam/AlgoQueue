@@ -4,6 +4,7 @@ import com.leaf.algoqueue.common.dto.CodeUpdateRequest;
 import com.leaf.algoqueue.common.dto.MemoUpdateRequest;
 import com.leaf.algoqueue.common.dto.SolveHistoryCreateRequest;
 import com.leaf.algoqueue.common.dto.SolveHistoryResponse;
+import com.leaf.algoqueue.common.dto.SuccessUpdateRequest;
 import com.leaf.algoqueue.common.enums.Language;
 import com.leaf.algoqueue.service.SolveHistoryService;
 import jakarta.validation.Valid;
@@ -103,6 +104,19 @@ public class SolveHistoryController {
             @RequestBody CodeUpdateRequest request
     ) {
         return ResponseEntity.ok(solveHistoryService.updateSourceCode(userId, id, request));
+    }
+
+    /**
+     * PUT /api/users/{userId}/solve-histories/{id}/success
+     * 성공 여부 수정
+     */
+    @PutMapping("/{id}/success")
+    public ResponseEntity<SolveHistoryResponse> updateSuccess(
+            @PathVariable Long userId,
+            @PathVariable Long id,
+            @Valid @RequestBody SuccessUpdateRequest request
+    ) {
+        return ResponseEntity.ok(solveHistoryService.updateSuccess(userId, id, request));
     }
 
     /**

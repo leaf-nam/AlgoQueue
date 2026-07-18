@@ -40,6 +40,7 @@ export default function AlgoQueuePage() {
   });
   const [newMemo, setNewMemo] = useState("");
   const [newCode, setNewCode] = useState("");
+  const [newSuccess, setNewSuccess] = useState(true);
   const submittingRef = useRef(false);
   const { toast } = useToast();
 
@@ -111,6 +112,9 @@ export default function AlgoQueuePage() {
   const submitMemo = async () => {
     if (!memoTarget) return;
     try {
+      if (newSuccess !== memoTarget.success) {
+        await api.history.updateSuccess(USER_ID, memoTarget.id, newSuccess);
+      }
       await api.history.updateMemo(USER_ID, memoTarget.id, newMemo);
       toast("회고가 수정되었습니다.", "success");
       setMemoTarget(null);
@@ -246,6 +250,7 @@ export default function AlgoQueuePage() {
                           onClick={() => {
                             setMemoTarget(h);
                             setNewMemo(h.memo ?? "");
+                            setNewSuccess(h.success);
                           }}
                         >
                           ✎
@@ -382,12 +387,32 @@ export default function AlgoQueuePage() {
       {memoTarget && (
         <Modal title="회고 수정" onClose={() => setMemoTarget(null)}>
           <p className="text-muted text-sm">{memoTarget.problemTitle}</p>
-          <textarea
-            className="form-textarea"
-            value={newMemo}
-            onChange={(e) => setNewMemo(e.target.value)}
-            rows={5}
-          />
+          <div className="form-group" style={{ marginTop: 8 }}>
+            <label className="form-label">결과</label>
+            <div className="flex gap-2">
+              <button
+                className={`btn ${newSuccess ? "btn-primary" : "btn-ghost"}`}
+                onClick={() => setNewSuccess(true)}
+              >
+                ✓ 성공
+              </button>
+              <button
+                className={`btn ${!newSuccess ? "btn-danger" : "btn-ghost"}`}
+                onClick={() => setNewSuccess(false)}
+              >
+                ✕ 실패
+              </button>
+            </div>
+          </div>
+          <div className="form-group" style={{ marginTop: 8 }}>
+            <label className="form-label">회고</label>
+            <textarea
+              className="form-textarea"
+              value={newMemo}
+              onChange={(e) => setNewMemo(e.target.value)}
+              rows={5}
+            />
+          </div>
           <div className="form-actions">
             <button
               className="btn btn-ghost"
