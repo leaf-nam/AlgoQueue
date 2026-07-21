@@ -526,6 +526,8 @@ tbody td.primary {
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 .timer-pulse {
   width: 8px;

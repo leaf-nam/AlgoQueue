@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import type { Problem, Language, Category, SolveHistory, Difficulty as DifficultyType } from "../types/index";
 import { Modal, LANG_LABEL, LangBadge, SuccessBadge, fmtDate, fmtTime } from "../components/shared";
@@ -18,6 +18,7 @@ const DIFF_LABEL: Record<string, string> = {
 type SortMode = "default" | "difficulty" | "lastSolved";
 
 export default function SolvePage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -260,6 +261,12 @@ export default function SolvePage() {
           <div className="page-title">문제 풀이</div>
           <div className="page-subtitle">// SOLVE PROBLEM</div>
         </div>
+        <button
+          className="btn btn-ghost"
+          onClick={() => navigate("/problems")}
+        >
+          + 문제 등록
+        </button>
       </div>
 
       {/* ── Timer Widget ── */}

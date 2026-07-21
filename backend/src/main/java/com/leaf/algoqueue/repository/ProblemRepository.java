@@ -37,4 +37,12 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
         where (:solvedIds is null or p.id not in :solvedIds)
     """)
     List<Problem> findRecommendCandidates(List<Long> solvedIds);
+
+    @Query("""
+        SELECT p FROM Problem p
+        JOIN FETCH p.category c
+        WHERE p.hidden = false
+        ORDER BY p.createdAt DESC
+    """)
+    List<Problem> findAllNonHidden();
 }

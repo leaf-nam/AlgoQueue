@@ -57,4 +57,6 @@ public interface SolveHistoryRepository extends JpaRepository<SolveHistory, Long
 
     Optional<SolveHistory> findTopByUserIdAndProblemIdOrderBySolvedAtDesc(
             Long userId, Long problemId);
+
+    List<SolveHistory> findAllByUserId(Long userId);
 }
