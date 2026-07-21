@@ -20,6 +20,7 @@ import GraphsPage from "./pages/GraphsPage";
 import "./styles/App.css";
 import SolvePage from "./pages/SolvePage";
 import AlgoQueuePage from "./pages/AlgoQueuePage";
+import AlgoQueueRecommendPage from "./pages/AlgoQueueRecommendPage";
 
 /**
  * Shell layout: Navbar + main content area.
@@ -52,6 +53,7 @@ function App() {
               <Route path="problems" element={<ProblemsPage />} />
               <Route path="categories" element={<CategoriesPage />} />
               <Route path="/solve" element={<SolvePage />} />
+              <Route path="/algo-queue" element={<AlgoQueueRecommendPage />} />
               <Route path="/queue" element={<AlgoQueuePage />} />
               <Route path="/graphs" element={<GraphsPage />} />
               <Route path="settings" element={<SettingsPage />} />

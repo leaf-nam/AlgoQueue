@@ -10,6 +10,7 @@ import {
   MdSettings,
   MdCode,
   MdBarChart,
+  MdQueue,
 } from "react-icons/md";
 
 function Navbar() {
@@ -28,9 +29,14 @@ function Navbar() {
           문제 풀이
         </Link>
 
+        <Link to="/algo-queue" className="nav-item">
+          <MdQueue className="nav-icon" />
+          알고리즘 큐
+        </Link>
+
         <Link to="/queue" className="nav-item">
           <MdHistory className="nav-icon" />
-          알고리즘 큐
+          풀이 이력
         </Link>
 
         <Link to="/graphs" className="nav-item">

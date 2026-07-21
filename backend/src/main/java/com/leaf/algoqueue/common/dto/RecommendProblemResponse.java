@@ -8,17 +8,21 @@ import lombok.Getter;
 @Builder
 public class RecommendProblemResponse {
 
-    private Long id;
-    private String title;
+    private Long problemId;
     private String platform;
+    private String problemNumber;
+    private String title;
     private String difficulty;
+    private String categoryName;
 
     public static RecommendProblemResponse from(Problem p) {
         return RecommendProblemResponse.builder()
-                .id(p.getId())
-                .title(p.getTitle())
+                .problemId(p.getId())
                 .platform(p.getPlatform().name())
-                .difficulty(p.getDifficulty().name())
+                .problemNumber(p.getProblemNumber())
+                .title(p.getTitle())
+                .difficulty(p.getDifficulty() != null ? p.getDifficulty().name() : null)
+                .categoryName(p.getCategory().getName())
                 .build();
     }
 }

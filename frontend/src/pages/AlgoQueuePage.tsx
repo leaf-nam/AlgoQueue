@@ -138,8 +138,8 @@ export default function AlgoQueuePage() {
     <>
       <div className="page-header">
         <div>
-          <div className="page-title">알고리즘 큐 / 이력</div>
-          <div className="page-subtitle">// ALGO QUEUE & HISTORY</div>
+          <div className="page-title">풀이 이력</div>
+          <div className="page-subtitle">// SOLVE HISTORY</div>
         </div>
         <button
           className="btn btn-primary"
