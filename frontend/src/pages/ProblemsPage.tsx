@@ -460,7 +460,7 @@ export default function ProblemsPage() {
                   </button>
                 </div>
                 {showNewCat && (
-                  <div className="flex gap-2" style={{ marginTop: 6 }}>
+                  <div className="flex gap-2" style={{ marginTop: 6, flexWrap: "wrap" }}>
                     <input
                       className="form-input"
                       value={newCatName}
@@ -474,10 +474,12 @@ export default function ProblemsPage() {
                       }}
                       placeholder="새 카테고리명"
                       autoFocus
+                      style={{ flex: 1, minWidth: 120 }}
                     />
                     <button
                       className="btn btn-primary btn-sm"
                       onClick={createCategory}
+                      style={{ flexShrink: 0 }}
                     >
                       추가
                     </button>
@@ -487,6 +489,7 @@ export default function ProblemsPage() {
                         setShowNewCat(false);
                         setNewCatName("");
                       }}
+                      style={{ flexShrink: 0 }}
                     >
                       취소
                     </button>
