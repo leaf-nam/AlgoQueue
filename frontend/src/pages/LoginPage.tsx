@@ -731,7 +731,7 @@ export default function LoginPage() {
     return e;
   };
 
-  const { login } = useAuth();
+  const { login, guestLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -877,6 +877,21 @@ export default function LoginPage() {
 
           <button className="aq-btn aq-btn--secondary" onClick={openSignup}>
             회원가입
+          </button>
+
+          <div className="aq-divider">
+            <span>또는</span>
+          </div>
+
+          <button
+            className="aq-btn aq-btn--ghost"
+            onClick={() => {
+              guestLogin();
+              showToast("게스트로 로그인했습니다.", "success");
+              navigate("/");
+            }}
+          >
+            게스트로 체험하기
           </button>
         </div>
 

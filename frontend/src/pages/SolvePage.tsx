@@ -1,9 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { useAuth } from "../auth/AuthContext";
 import type { Problem, Language, Category, SolveHistory, Difficulty as DifficultyType } from "../types/index";
 import { Modal, LANG_LABEL, LangBadge, SuccessBadge, fmtDate, fmtTime } from "../components/shared";
 import { useToast } from "../hooks/useToast";
+import {
+  getGuestHistory,
+  addGuestHistory,
+  getGuestProblems,
+  getGuestCategories,
+  type GuestSolveHistory,
+} from "../lib/guest";
 
 const USER_ID = 1;
 const LANGS: Language[] = ["JAVA", "CPP", "PYTHON", "KOTLIN"];
@@ -54,16 +62,24 @@ export default function SolvePage() {
 
   const { toast } = useToast();
 
+  const { isGuest } = useAuth();
+
   useEffect(() => {
-    Promise.all([
-      api.problems.list({ hidden: false }),
-      api.categories.list(false),
-      api.history.list(USER_ID),
-    ]).then(([p, c, h]) => {
-      setProblems(p);
-      setCategories(c);
-      setAllHistories(h);
-    }).catch((e) => toast(e.message, "error"));
+    if (isGuest) {
+      setProblems(getGuestProblems());
+      setCategories(getGuestCategories());
+      setAllHistories(getGuestHistory());
+    } else {
+      Promise.all([
+        api.problems.list({ hidden: false }),
+        api.categories.list(false),
+        api.history.list(USER_ID),
+      ]).then(([p, c, h]) => {
+        setProblems(p);
+        setCategories(c);
+        setAllHistories(h);
+      }).catch((e) => toast(e.message, "error"));
+    }
 
     return () => clearInterval(intervalRef.current);
   }, []);
@@ -115,9 +131,14 @@ export default function SolvePage() {
       setHistories([]);
       return;
     }
-    api.history.list(USER_ID, { problemId: Number(timerProblem) })
-      .then(setHistories)
-      .catch((e) => toast(e.message, "error"));
+    const pid = Number(timerProblem);
+    if (isGuest) {
+      setHistories(getGuestHistory().filter((h) => h.problemId === pid));
+    } else {
+      api.history.list(USER_ID, { problemId: pid })
+        .then(setHistories)
+        .catch((e) => toast(e.message, "error"));
+    }
   }, [timerProblem]);
 
   // Stats derived from histories
@@ -205,14 +226,33 @@ export default function SolvePage() {
     if (submittingRef.current) return;
     submittingRef.current = true;
     try {
-      await api.history.create(USER_ID, {
-        problemId: Number(form.problemId),
-        language: form.language,
-        success: form.success,
-        elapsedTime: form.elapsedTime,
-        memo: form.memo || undefined,
-        sourceCode: form.sourceCode || undefined,
-      });
+      const pid = Number(form.problemId);
+      if (isGuest) {
+        const p = problems.find((x) => x.id === pid);
+        addGuestHistory({
+          problemId: pid,
+          platform: p!.platform,
+          problemNumber: p!.problemNumber,
+          problemTitle: p!.title,
+          categoryName: p!.categoryName,
+          language: form.language,
+          success: form.success,
+          elapsedTime: form.elapsedTime,
+          memo: form.memo || null,
+          sourceCode: form.sourceCode || null,
+          solvedAt: new Date().toISOString(),
+        });
+        setAllHistories(getGuestHistory());
+      } else {
+        await api.history.create(USER_ID, {
+          problemId: pid,
+          language: form.language,
+          success: form.success,
+          elapsedTime: form.elapsedTime,
+          memo: form.memo || undefined,
+          sourceCode: form.sourceCode || undefined,
+        });
+      }
       toast("풀이가 성공적으로 기록되었습니다.", "success");
       setRecordModal(false);
       setTP("");

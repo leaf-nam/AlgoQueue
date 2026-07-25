@@ -84,3 +84,39 @@
   background: #2563eb;
   color: white;
 }
+
+.sidebar-guest-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #facc15;
+  background: rgba(250, 204, 21, 0.12);
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  border-radius: 4px;
+  padding: 1px 8px;
+  margin-top: 4px;
+  text-align: center;
+  display: inline-block;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px;
+}
+
+.sidebar-logout-btn {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.sidebar-logout-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}

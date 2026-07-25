@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Navbar.css";
 import logo from "../assets/algoqueue.png";
+import { useAuth } from "../auth/AuthContext";
+import { isGuestTourDone } from "../lib/guest";
+import GuestTour from "./GuestTour";
 
 import {
   MdDashboard,
@@ -14,57 +18,79 @@ import {
 } from "react-icons/md";
 
 function Navbar() {
+  const { isGuest, logout } = useAuth();
+  const [showTour, setShowTour] = useState(!isGuestTourDone() && isGuest);
+
   return (
-    <aside className="sidebar">
-      <div className="sidebar-logo">
-        <Link to="/" className="logo-link">
-          <img src={logo} alt="Algo Queue" className="logo-img" />
-          <h2 className="logo-text">Algo Queue</h2>
-        </Link>
-      </div>
+    <>
+      {showTour && <GuestTour onDone={() => setShowTour(false)} />}
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <Link to="/" className="logo-link">
+            <img src={logo} alt="Algo Queue" className="logo-img" />
+            <h2 className="logo-text">Algo Queue</h2>
+          </Link>
+          {isGuest && (
+            <div className="sidebar-guest-badge" title="게스트 모드">
+              GUEST
+            </div>
+          )}
+        </div>
 
-      <nav className="sidebar-nav">
-        <Link to="/solve" className="nav-item">
-          <MdCode className="nav-icon" />
-          문제 풀이
-        </Link>
+        <nav className="sidebar-nav">
+          <Link to="/solve" className="nav-item">
+            <MdCode className="nav-icon" />
+            문제 풀이
+          </Link>
 
-        <Link to="/algo-queue" className="nav-item">
-          <MdAutoAwesomeMotion className="nav-icon" />
-          알고리즘 큐
-        </Link>
+          <Link to="/algo-queue" className="nav-item">
+            <MdAutoAwesomeMotion className="nav-icon" />
+            알고리즘 큐
+          </Link>
 
-        <Link to="/queue" className="nav-item">
-          <MdHistory className="nav-icon" />
-          풀이 이력
-        </Link>
+          <Link to="/queue" className="nav-item">
+            <MdHistory className="nav-icon" />
+            풀이 이력
+          </Link>
 
-        <Link to="/graphs" className="nav-item">
-          <MdBarChart className="nav-icon" />
-          그래프
-        </Link>
+          <Link to="/graphs" className="nav-item">
+            <MdBarChart className="nav-icon" />
+            그래프
+          </Link>
 
-        <Link to="/" className="nav-item">
-          <MdDashboard className="nav-icon" />
-          대시보드
-        </Link>
+          <Link to="/" className="nav-item">
+            <MdDashboard className="nav-icon" />
+            대시보드
+          </Link>
 
-        <Link to="/problems" className="nav-item">
-          <MdOutlineAssignment className="nav-icon" />
-          문제
-        </Link>
+          <Link to="/problems" className="nav-item">
+            <MdOutlineAssignment className="nav-icon" />
+            문제
+          </Link>
 
-        <Link to="/categories" className="nav-item">
-          <MdLabel className="nav-icon" />
-          카테고리
-        </Link>
+          <Link to="/categories" className="nav-item">
+            <MdLabel className="nav-icon" />
+            카테고리
+          </Link>
 
-        <Link to="/settings" className="nav-item">
-          <MdSettings className="nav-icon" />
-          설정
-        </Link>
-      </nav>
-    </aside>
+          <Link to="/settings" className="nav-item">
+            <MdSettings className="nav-icon" />
+            설정
+          </Link>
+        </nav>
+
+        {isGuest && (
+          <div className="sidebar-footer">
+            <button
+              className="sidebar-logout-btn"
+              onClick={() => { logout(); }}
+            >
+              로그아웃
+            </button>
+          </div>
+        )}
+      </aside>
+    </>
   );
 }
 

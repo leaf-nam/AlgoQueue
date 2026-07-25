@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { useAuth } from "../auth/AuthContext";
 import type { RecommendProblem, SolveHistory } from "../types";
 import {
   DiffBadge,
@@ -12,23 +13,30 @@ import {
 } from "../components/shared";
 import ContributionGraph from "../components/ContributionGraph";
 import { useToast } from "../hooks/useToast";
+import { getGuestRecommends, getGuestHistory } from "../lib/guest";
 
-const USER_ID = 1; // TODO: auth 연동 후 교체
+const USER_ID = 1;
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const [recommends, setRecommends] = useState<RecommendProblem[]>([]);
   const [allHistories, setAllHistories] = useState<SolveHistory[]>([]);
   const { toast } = useToast();
+  const { isGuest } = useAuth();
 
   useEffect(() => {
-    Promise.all([api.recommend.list(USER_ID), api.history.list(USER_ID)])
-      .then(([rec, hist]) => {
-        setRecommends(rec);
-        setAllHistories(hist);
-      })
-      .catch((e) => toast(e.message, "error"));
-  }, []);
+    if (isGuest) {
+      setRecommends(getGuestRecommends());
+      setAllHistories(getGuestHistory() as unknown as SolveHistory[]);
+    } else {
+      Promise.all([api.recommend.list(USER_ID), api.history.list(USER_ID)])
+        .then(([rec, hist]) => {
+          setRecommends(rec);
+          setAllHistories(hist);
+        })
+        .catch((e) => toast(e.message, "error"));
+    }
+  }, [isGuest]);
 
   const recent = allHistories.slice(0, 10);
   const stats = {
