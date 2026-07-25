@@ -11,6 +11,7 @@ import {
   MdCode,
   MdBarChart,
   MdQueue,
+  MdRecommend,
 } from "react-icons/md";
 
 function Navbar() {
@@ -30,8 +31,8 @@ function Navbar() {
         </Link>
 
         <Link to="/algo-queue" className="nav-item">
-          <MdQueue className="nav-icon" />
-          추천
+          <MdRecommend className="nav-icon" />
+          알고리즘 큐
         </Link>
 
         <Link to="/queue" className="nav-item">

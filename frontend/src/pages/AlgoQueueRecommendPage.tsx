@@ -29,8 +29,8 @@ export default function AlgoQueueRecommendPage() {
     <>
       <div className="page-header">
         <div>
-          <div className="page-title">추천</div>
-          <div className="page-subtitle">// RECOMMEND</div>
+          <div className="page-title">알고리즘 큐</div>
+          <div className="page-subtitle">// ALGORITHM QUEUE</div>
         </div>
       </div>
 
