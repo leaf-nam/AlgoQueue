@@ -8,8 +8,8 @@ interface Props {
 const DAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""];
 
 const MONTH_LABELS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "1", "2", "3", "4", "5", "6",
+  "7", "8", "9", "10", "11", "12",
 ];
 
 function getLevel(count: number): 0 | 1 | 2 | 3 | 4 {
@@ -150,13 +150,20 @@ export default function ContributionGraph({ data, year }: Props) {
 
       <div className="contribution-grid-wrap">
         {/* Month labels */}
-        <div className="cg-months">
+        <div
+          className="cg-months"
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${weeks.length}, 12px)`,
+            gap: 2,
+          }}
+        >
           <div className="cg-spacer" />
           {monthLabels.map((m) => (
             <span
               key={m.weekIndex}
               className="cg-month-label"
-              style={{ gridColumn: m.weekIndex + 2 }}
+              style={{ gridColumn: m.weekIndex + 1 }}
             >
               {m.label}
             </span>
@@ -233,8 +240,6 @@ export default function ContributionGraph({ data, year }: Props) {
           overflow-x: auto;
         }
         .cg-months {
-          display: flex;
-          gap: 2px;
           margin-left: 28px;
           margin-bottom: 2px;
         }
@@ -244,7 +249,7 @@ export default function ContributionGraph({ data, year }: Props) {
         .cg-month-label {
           font-size: 10px;
           color: var(--text-muted);
-          white-space: nowrap;
+          text-align: center;
         }
         .cg-body {
           display: flex;
