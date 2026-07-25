@@ -31,7 +31,7 @@ function Navbar() {
 
         <Link to="/algo-queue" className="nav-item">
           <MdQueue className="nav-icon" />
-          알고리즘 큐
+          추천
         </Link>
 
         <Link to="/queue" className="nav-item">
