@@ -71,7 +71,7 @@ describe("SolvePage - Timer", () => {
     expect(screen.getByText("↺ 리셋")).toBeInTheDocument();
   });
 
-  it("shows 재시작 button after stopping", async () => {
+  it("shows 재개 button after stopping", async () => {
     renderWithProviders(<SolvePage />);
     const select = await getProblemSelect();
     fireEvent.change(select, { target: { value: "1" } });
@@ -79,7 +79,7 @@ describe("SolvePage - Timer", () => {
     expect(await screen.findByText("■ 정지")).toBeInTheDocument();
     act(() => { vi.advanceTimersByTime(2000); });
     fireEvent.click(screen.getByText("■ 정지"));
-    expect(screen.getByText("▶ 재시작")).toBeInTheDocument();
+    expect(screen.getByText("▶ 재개")).toBeInTheDocument();
   });
 
   it("opens record modal when 기록 is clicked", async () => {

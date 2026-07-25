@@ -162,11 +162,15 @@ export default function SolvePage() {
 
   const startTimer = (reset = true) => {
     if (!timerProblem) return toast("문제를 선택하세요.", "error");
-    if (reset) setElapsed(0);
-    startTimeRef.current = Date.now();
+    if (reset) {
+      setElapsed(0);
+      startTimeRef.current = Date.now();
+    } else {
+      startTimeRef.current = Date.now() - elapsed * 1000;
+    }
     setRunning(true);
     intervalRef.current = setInterval(updateElapsed, 1000);
-    toast("타이머 시작", "success");
+    toast("타이머 재개", "success");
   };
 
   const stopTimer = useCallback(() => {
@@ -360,7 +364,7 @@ export default function SolvePage() {
                 기록
               </button>
               <button className="btn btn-ghost" onClick={() => startTimer(false)}>
-                ▶ 재시작
+                ▶ 재개
               </button>
               <button className="btn btn-ghost" onClick={resetTimer}>
                 ↺ 리셋
