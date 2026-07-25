@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { useAuth } from "../auth/AuthContext";
 import type { RecommendProblem } from "../types";
 import { DiffBadge, PlatformBadge, Loading, Empty } from "../components/shared";
 import { useToast } from "../hooks/useToast";
+import { getGuestRecommends } from "../lib/guest";
 
 const USER_ID = 1;
 
@@ -12,18 +14,24 @@ export default function AlgoQueueRecommendPage() {
   const [recommends, setRecommends] = useState<RecommendProblem[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { isGuest } = useAuth();
 
   const load = () => {
     setLoading(true);
-    api.recommend.list(USER_ID)
-      .then(setRecommends)
-      .catch((e) => toast(e.message, "error"))
-      .finally(() => setLoading(false));
+    if (isGuest) {
+      setRecommends(getGuestRecommends());
+      setLoading(false);
+    } else {
+      api.recommend.list(USER_ID)
+        .then(setRecommends)
+        .catch((e) => toast(e.message, "error"))
+        .finally(() => setLoading(false));
+    }
   };
 
   useEffect(() => {
     load();
-  }, []);
+  }, [isGuest]);
 
   return (
     <>

@@ -4,11 +4,13 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 import { authEvent } from "./AuthEvent";
 import { useToast } from "../hooks/useToast";
 import { resetAuthErrorFlag } from "../api";
+import { clearGuestHistory } from "../lib/guest";
 // ── Types ──────────────────────────────────────────────────
 export interface AuthUser {
   id: number;
@@ -19,7 +21,9 @@ export interface AuthUser {
 interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
+  isGuest: boolean;
   login: (user: AuthUser) => void;
+  guestLogin: () => void;
   logout: () => void;
 }
 
@@ -27,6 +31,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 const USER_KEY = "aq_user";
+const GUEST_FLAG_KEY = "aq_guest";
 
 // ── Provider ───────────────────────────────────────────────
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -38,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     toast(reason, "error");
     setUser(null);
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(GUEST_FLAG_KEY);
   };
 
   // Restore session on first mount
@@ -50,8 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(JSON.parse(raw) as AuthUser);
       }
     } catch {
-      // corrupted data → treat as logged out
       localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(GUEST_FLAG_KEY);
     } finally {
       setIsLoading(false);
     }
@@ -59,18 +65,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback((user: AuthUser) => {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
+    localStorage.removeItem(GUEST_FLAG_KEY);
     resetAuthErrorFlag();
     setUser(user);
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(USER_KEY);
-    setUser(null);
-    // TODO: POST /api/auth/logout (invalidate server-side token)
+  const guestLogin = useCallback(() => {
+    const guest: AuthUser = { id: 0, email: "guest@algoqueue", nickname: "게스트" };
+    localStorage.setItem(USER_KEY, JSON.stringify(guest));
+    localStorage.setItem(GUEST_FLAG_KEY, "true");
+    resetAuthErrorFlag();
+    setUser(guest);
   }, []);
 
+  const logout = useCallback(() => {
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(GUEST_FLAG_KEY);
+    clearGuestHistory();
+    setUser(null);
+  }, []);
+
+  const isGuest = useMemo(
+    () => user !== null && localStorage.getItem(GUEST_FLAG_KEY) === "true",
+    [user],
+  );
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isGuest, login, guestLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );
