@@ -274,34 +274,36 @@ export default function SolvePage() {
         <div className="timer-label">// SOLVE TIMER</div>
         <div className={`timer-display ${timerClass()}`}>{fmtElapsed()}</div>
         <div className="timer-controls">
-          <select
-            className="form-select"
-            value={categoryFilter}
-            onChange={(e) => {
-              setCategoryFilter(e.target.value ? Number(e.target.value) : "");
-              setTP("");
-            }}
-            disabled={running}
-          >
-            <option value="">전체 카테고리</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          <select
-            className="form-select"
-            value={difficultyFilter}
-            onChange={(e) => {
-              setDifficultyFilter(e.target.value as DifficultyType | "");
-              setTP("");
-            }}
-            disabled={running}
-          >
-            <option value="">전체 난이도</option>
-            {DIFFS.map((d) => (
-              <option key={d} value={d}>{DIFF_LABEL[d]}</option>
-            ))}
-          </select>
+          <div className="filter-pair">
+            <select
+              className="form-select"
+              value={categoryFilter}
+              onChange={(e) => {
+                setCategoryFilter(e.target.value ? Number(e.target.value) : "");
+                setTP("");
+              }}
+              disabled={running}
+            >
+              <option value="">전체 카테고리</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+            <select
+              className="form-select"
+              value={difficultyFilter}
+              onChange={(e) => {
+                setDifficultyFilter(e.target.value as DifficultyType | "");
+                setTP("");
+              }}
+              disabled={running}
+            >
+              <option value="">전체 난이도</option>
+              {DIFFS.map((d) => (
+                <option key={d} value={d}>{DIFF_LABEL[d]}</option>
+              ))}
+            </select>
+          </div>
           <select
             className="form-select"
             value={sortMode}
