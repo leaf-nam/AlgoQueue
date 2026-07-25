@@ -10,7 +10,7 @@ import {
   MdSettings,
   MdCode,
   MdBarChart,
-  MdQueue,
+  MdAutoAwesomeMotion,
 } from "react-icons/md";
 
 function Navbar() {
@@ -30,7 +30,7 @@ function Navbar() {
         </Link>
 
         <Link to="/algo-queue" className="nav-item">
-          <MdQueue className="nav-icon" />
+          <MdAutoAwesomeMotion className="nav-icon" />
           알고리즘 큐
         </Link>
 
