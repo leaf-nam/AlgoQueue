@@ -10,7 +10,6 @@ import {
   addGuestHistory,
   getGuestProblems,
   getGuestCategories,
-  type GuestSolveHistory,
 } from "../lib/guest";
 
 const USER_ID = 1;
@@ -230,6 +229,7 @@ export default function SolvePage() {
       if (isGuest) {
         const p = problems.find((x) => x.id === pid);
         addGuestHistory({
+          userId: 0,
           problemId: pid,
           platform: p!.platform,
           problemNumber: p!.problemNumber,

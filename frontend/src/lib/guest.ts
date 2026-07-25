@@ -1,9 +1,7 @@
 import type {
   Problem,
   Platform,
-  Difficulty,
   Language,
-  SolveHistory,
   RecommendProblem,
 } from "../types";
 
@@ -156,6 +154,7 @@ function persistHistory(h: GuestSolveHistory[]) {
 
 export interface GuestSolveHistory {
   id: number;
+  userId: number;
   problemId: number;
   platform: Platform;
   problemNumber: string;
