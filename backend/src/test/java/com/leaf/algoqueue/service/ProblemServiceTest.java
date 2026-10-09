@@ -7,6 +7,7 @@ import com.leaf.algoqueue.common.enums.Difficulty;
 import com.leaf.algoqueue.common.enums.Platform;
 import com.leaf.algoqueue.repository.CategoryRepository;
 import com.leaf.algoqueue.repository.ProblemRepository;
+import com.leaf.algoqueue.repository.SolveHistoryRepository;
 import com.leaf.algoqueue.repository.entity.Category;
 import com.leaf.algoqueue.repository.entity.Problem;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,6 +39,9 @@ class ProblemServiceTest {
     private ProblemRepository problemRepository;
 
     @Mock
+    private SolveHistoryRepository solveHistoryRepository;
+
+    @Mock
     private CategoryRepository categoryRepository;
 
     @Nested
@@ -50,11 +54,13 @@ class ProblemServiceTest {
             Category category = createCategory(1L, "자료구조");
             given(problemRepository.findAllWithFilter(null, null, null))
                     .willReturn(List.of(createProblem(1L, Platform.PROGRAMMERS, "1", "테스트", category)));
+            given(solveHistoryRepository.findAllByUserId(1L)).willReturn(List.of());
 
-            List<ProblemResponse> result = problemService.getProblems(null, null, null);
+            List<ProblemResponse> result = problemService.getProblems(null, null, null, 1L);
 
             assertThat(result).hasSize(1);
             assertThat(result.get(0).getTitle()).isEqualTo("테스트");
+            assertThat(result.get(0).getSolveCount()).isEqualTo(0);
         }
 
         @Test
@@ -63,8 +69,9 @@ class ProblemServiceTest {
             Category category = createCategory(1L, "자료구조");
             given(problemRepository.findAllWithFilter(Platform.PROGRAMMERS, 1L, false))
                     .willReturn(List.of(createProblem(1L, Platform.PROGRAMMERS, "1", "테스트", category)));
+            given(solveHistoryRepository.findAllByUserId(1L)).willReturn(List.of());
 
-            List<ProblemResponse> result = problemService.getProblems(Platform.PROGRAMMERS, 1L, false);
+            List<ProblemResponse> result = problemService.getProblems(Platform.PROGRAMMERS, 1L, false, 1L);
 
             assertThat(result).hasSize(1);
         }

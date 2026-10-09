@@ -40,6 +40,8 @@ export interface Problem {
   categoryName: string;
   hidden: boolean;
   createdAt: string;
+  solveCount?: number;
+  avgElapsedTime?: number | null;
 }
 
 // ─── ProblemSetting ───────────────────────────────────────────────────────────
@@ -82,6 +84,9 @@ export interface RecommendProblem {
   title: string;
   difficulty: Difficulty | null;
   categoryName: string;
+  reason?: "FAILED" | "OVERTIME" | "NEW";
+  lastSolvedAt?: string | null;
+  lastElapsedTime?: number | null;
 }
 
 // ─── Auth ────────────────────────────────────────────────────────────────────

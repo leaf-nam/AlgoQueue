@@ -38,9 +38,10 @@ public class ProblemController {
     public ResponseEntity<List<ProblemResponse>> getProblems(
             @RequestParam(required = false) Platform platform,
             @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Boolean hidden
+            @RequestParam(required = false) Boolean hidden,
+            @RequestParam(required = false) Long userId
     ) {
-        return ResponseEntity.ok(problemService.getProblems(platform, categoryId, hidden));
+        return ResponseEntity.ok(problemService.getProblems(platform, categoryId, hidden, userId));
     }
 
     /**

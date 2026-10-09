@@ -64,7 +64,7 @@ class RecommendServiceTest {
         }
 
         @Test
-        @DisplayName("모든 문제를 풀었고 15분 이상 걸린 문제가 없으면 빈 목록을 반환한다")
+        @DisplayName("모든 문제를 풀었고 15분 초과 문제가 없으면 빈 목록을 반환한다")
         void noCandidates() {
             given(problemRepository.findAllNonHidden())
                     .willReturn(List.of(
@@ -80,6 +80,60 @@ class RecommendServiceTest {
             List<RecommendProblemResponse> result = recommendService.recommend(1L);
 
             assertThat(result).isEmpty();
+        }
+
+        @Test
+        @DisplayName("15분까지는 인정되어 큐에 들어가지 않는다 (15분 초과만 재풀이 대상)")
+        void fifteenMinutesIsAllowed() {
+            given(problemRepository.findAllNonHidden())
+                    .willReturn(List.of(createProblem(1L, "문제1")));
+            given(solveHistoryRepository.findAllByUserId(1L))
+                    .willReturn(List.of(
+                            createHistory(1L, 1L, 15, LocalDateTime.now().minusDays(1))
+                    ));
+
+            List<RecommendProblemResponse> result = recommendService.recommend(1L);
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        @DisplayName("16분 풀이는 15분 초과로 큐에 들어간다")
+        void sixteenMinutesIsOvertime() {
+            given(problemRepository.findAllNonHidden())
+                    .willReturn(List.of(createProblem(1L, "문제1")));
+            given(solveHistoryRepository.findAllByUserId(1L))
+                    .willReturn(List.of(
+                            createHistory(1L, 1L, 16, LocalDateTime.now().minusDays(1))
+                    ));
+
+            List<RecommendProblemResponse> result = recommendService.recommend(1L);
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getReason()).isEqualTo("OVERTIME");
+        }
+
+        @Test
+        @DisplayName("실패 + 시간초과 후보는 풀이 날짜 오름차순으로 정렬된다")
+        void sortedBySolvedAt() {
+            given(problemRepository.findAllNonHidden())
+                    .willReturn(List.of(
+                            createProblem(1L, "문제1"),
+                            createProblem(2L, "문제2"),
+                            createProblem(3L, "문제3")
+                    ));
+            LocalDateTime now = LocalDateTime.now();
+            given(solveHistoryRepository.findAllByUserId(1L))
+                    .willReturn(List.of(
+                            createHistory(1L, 1L, 30, now.minusDays(1)),
+                            createFailedHistory(2L, 2L, 5, now.minusDays(3)),
+                            createHistory(3L, 3L, 20, now.minusDays(2))
+                    ));
+
+            List<RecommendProblemResponse> result = recommendService.recommend(1L);
+
+            assertThat(result).extracting(RecommendProblemResponse::getTitle)
+                    .containsExactly("문제2", "문제3", "문제1");
         }
 
         @Test
@@ -119,6 +173,14 @@ class RecommendServiceTest {
     }
 
     private SolveHistory createHistory(Long id, Long problemId, int elapsedTime, LocalDateTime solvedAt) {
+        return createHistoryWithSuccess(id, problemId, true, elapsedTime, solvedAt);
+    }
+
+    private SolveHistory createFailedHistory(Long id, Long problemId, int elapsedTime, LocalDateTime solvedAt) {
+        return createHistoryWithSuccess(id, problemId, false, elapsedTime, solvedAt);
+    }
+
+    private SolveHistory createHistoryWithSuccess(Long id, Long problemId, boolean success, int elapsedTime, LocalDateTime solvedAt) {
         Problem p = createProblem(problemId, "문제" + problemId);
         User user = User.builder().email("test@test.com").nickname("test").password("pw").build();
         setId(user, 1L);
@@ -126,7 +188,7 @@ class RecommendServiceTest {
                 .user(user)
                 .problem(p)
                 .language(Language.JAVA)
-                .success(true)
+                .success(success)
                 .elapsedTime(elapsedTime)
                 .solvedAt(solvedAt)
                 .build();

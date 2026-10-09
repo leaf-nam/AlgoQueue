@@ -6,8 +6,10 @@ import com.leaf.algoqueue.common.dto.ProblemUpdateRequest;
 import com.leaf.algoqueue.common.enums.Platform;
 import com.leaf.algoqueue.repository.CategoryRepository;
 import com.leaf.algoqueue.repository.ProblemRepository;
+import com.leaf.algoqueue.repository.SolveHistoryRepository;
 import com.leaf.algoqueue.repository.entity.Category;
 import com.leaf.algoqueue.repository.entity.Problem;
+import com.leaf.algoqueue.repository.entity.SolveHistory;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -24,15 +28,31 @@ public class ProblemService {
 
     private final ProblemRepository problemRepository;
     private final CategoryRepository categoryRepository; // Category용 Repository
+    private final SolveHistoryRepository solveHistoryRepository;
 
     // -----------------------------------------------------------------------
     // 조회
     // -----------------------------------------------------------------------
 
-    public List<ProblemResponse> getProblems(Platform platform, Long categoryId, Boolean hidden) {
-        return problemRepository.findAllWithFilter(platform, categoryId, hidden)
-                .stream()
-                .map(ProblemResponse::from)
+    public List<ProblemResponse> getProblems(Platform platform, Long categoryId, Boolean hidden, Long userId) {
+        List<Problem> problems = problemRepository.findAllWithFilter(platform, categoryId, hidden);
+        if (userId == null) {
+            return problems.stream()
+                    .map(p -> ProblemResponse.from(p, 0, null))
+                    .toList();
+        }
+        List<SolveHistory> histories = solveHistoryRepository.findAllByUserId(userId);
+        Map<Long, DoubleSummaryStatistics> statsByProblem = histories.stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        h -> h.getProblem().getId(),
+                        java.util.stream.Collectors.summarizingDouble(h -> h.getElapsedTime())));
+        return problems.stream()
+                .map(p -> {
+                    DoubleSummaryStatistics stats = statsByProblem.get(p.getId());
+                    long count = stats == null ? 0 : stats.getCount();
+                    Double avg = stats == null ? null : stats.getAverage();
+                    return ProblemResponse.from(p, count, avg);
+                })
                 .toList();
     }
 

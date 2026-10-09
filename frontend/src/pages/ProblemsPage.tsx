@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { useAuth } from "../auth/AuthContext";
+import { getGuestHistory, getGuestProblems } from "../lib/guest";
 import type { Problem, Category, Platform, Difficulty } from "../types";
 import {
   DiffBadge,
@@ -10,6 +12,7 @@ import {
   Modal,
   ConfirmModal,
   fmtDate,
+  fmtTime,
   PLATFORM_LABEL,
 } from "../components/shared";
 import { useToast } from "../hooks/useToast";
@@ -42,12 +45,14 @@ const DIFF_LABEL = {
 
 export default function ProblemsPage() {
   const navigate = useNavigate();
+  const { isGuest } = useAuth();
   const [problems, setProblems] = useState<Problem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterPlatform, setFP] = useState<Platform | "">("");
   const [filterCat, setFC] = useState<number | "">("");
   const [showHidden, setShowHidden] = useState(false);
+  const [sortMode, setSortMode] = useState<"default" | "solveCount" | "avgTime">("default");
   const [modal, setModal] = useState<"create" | "edit" | null>(null);
   const [editing, setEditing] = useState<Problem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Problem | null>(null);
@@ -68,11 +73,50 @@ export default function ProblemsPage() {
 
   const load = () => {
     setLoading(true);
+    if (isGuest) {
+      // 게스트: 로컬 히스토리로 풀이수/평균시간 집계
+      const guestProblems = getGuestProblems();
+      const histories = getGuestHistory();
+      const stats = new Map<number, { count: number; total: number }>();
+      for (const h of histories) {
+        const s = stats.get(h.problemId) ?? { count: 0, total: 0 };
+        s.count += 1;
+        s.total += h.elapsedTime;
+        stats.set(h.problemId, s);
+      }
+      const withStats: Problem[] = guestProblems.map((p) => {
+        const s = stats.get(p.id);
+        return {
+          ...p,
+          solveCount: s?.count ?? 0,
+          avgElapsedTime: s ? Math.round(s.total / s.count) : null,
+        };
+      });
+      setProblems(
+        withStats.filter(
+          (p) =>
+            (!filterPlatform || p.platform === filterPlatform) &&
+            (!filterCat || p.categoryId === filterCat) &&
+            (showHidden || !p.hidden),
+        ),
+      );
+      setCategories(
+        [...new Set(withStats.map((p) => p.categoryName))].map((name, i) => ({
+          id: i + 1,
+          name,
+          hidden: false,
+          problemCount: withStats.filter((p) => p.categoryName === name).length,
+        })),
+      );
+      setLoading(false);
+      return;
+    }
     Promise.all([
       api.problems.list({
         platform: filterPlatform || undefined,
         categoryId: filterCat || undefined,
         hidden: showHidden ? undefined : false,
+        userId: 1,
       }),
       api.categories.list(),
     ])
@@ -86,7 +130,17 @@ export default function ProblemsPage() {
 
   useEffect(() => {
     load();
-  }, [filterPlatform, filterCat, showHidden]);
+  }, [filterPlatform, filterCat, showHidden, isGuest]);
+
+  const sortedProblems = [...problems].sort((a, b) => {
+    if (sortMode === "solveCount") {
+      return (b.solveCount ?? 0) - (a.solveCount ?? 0);
+    }
+    if (sortMode === "avgTime") {
+      return (b.avgElapsedTime ?? -1) - (a.avgElapsedTime ?? -1);
+    }
+    return 0;
+  });
 
   useEffect(() => {
     if (modal !== "create" || !form.url.trim()) return;
@@ -255,6 +309,16 @@ export default function ProblemsPage() {
             </option>
           ))}
         </select>
+        <select
+          className="form-select"
+          value={sortMode}
+          onChange={(e) => setSortMode(e.target.value as typeof sortMode)}
+          title="정렬 기준"
+        >
+          <option value="default">등록일순</option>
+          <option value="solveCount">많이 푼 순</option>
+          <option value="avgTime">평균시간 긴 순</option>
+        </select>
         <label
           className="flex items-center gap-2 text-sm text-muted"
           style={{ marginLeft: "auto" }}
@@ -287,12 +351,14 @@ export default function ProblemsPage() {
                   <th>플랫폼</th>
                   <th>카테고리</th>
                   <th>난이도</th>
+                  <th>풀이수</th>
+                  <th>평균시간</th>
                   <th>등록일</th>
                   <th>액션</th>
                 </tr>
               </thead>
               <tbody>
-                {problems.map((p) => (
+                {sortedProblems.map((p) => (
                   <tr key={p.id} style={{ opacity: p.hidden ? 0.5 : 1 }}>
                     <td className="text-mono text-muted">#{p.problemNumber}</td>
                     <td className="primary">
@@ -317,6 +383,10 @@ export default function ProblemsPage() {
                     <td className="text-muted">{p.categoryName}</td>
                     <td>
                       <DiffBadge diff={p.difficulty} />
+                    </td>
+                    <td className="text-mono">{p.solveCount ?? 0}</td>
+                    <td className="text-mono text-muted">
+                      {p.avgElapsedTime != null ? fmtTime(Math.round(p.avgElapsedTime)) : "—"}
                     </td>
                     <td className="text-mono text-muted">
                       {fmtDate(p.createdAt)}
