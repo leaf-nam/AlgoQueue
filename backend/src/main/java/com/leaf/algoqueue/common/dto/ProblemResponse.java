@@ -22,8 +22,16 @@ public class ProblemResponse {
     private String categoryName;
     private boolean hidden;
     private LocalDateTime createdAt;
+    /** 해당 사용자의 풀이 횟수 */
+    private long solveCount;
+    /** 해당 사용자의 평균 풀이 시간(분, 풀이 없으면 null) */
+    private Double avgElapsedTime;
 
     public static ProblemResponse from(Problem problem) {
+        return from(problem, 0, null);
+    }
+
+    public static ProblemResponse from(Problem problem, long solveCount, Double avgElapsedTime) {
         return ProblemResponse.builder()
                 .id(problem.getId())
                 .platform(problem.getPlatform())
@@ -35,6 +43,8 @@ public class ProblemResponse {
                 .categoryName(problem.getCategory().getName())
                 .hidden(problem.isHidden())
                 .createdAt(problem.getCreatedAt())
+                .solveCount(solveCount)
+                .avgElapsedTime(avgElapsedTime)
                 .build();
     }
 }

@@ -247,7 +247,7 @@ export function getGuestRecommends(): RecommendProblem[] {
     .filter((p) => !failedIds.has(p.id))
     .filter((p) => {
       const h = latestByProblem.get(p.id);
-      return h != null && h.elapsedTime >= 15;
+      return h != null && h.elapsedTime > 15;
     })
     .sort(
       (a, b) =>
@@ -256,30 +256,30 @@ export function getGuestRecommends(): RecommendProblem[] {
         ),
     );
 
-  const shuffled: Problem[] = [];
-  let i = 0, j = 0;
-  while (i < failed.length || j < longTime.length) {
-    if (i >= failed.length) {
-      shuffled.push(longTime[j++]);
-    } else if (j >= longTime.length) {
-      shuffled.push(failed[i++]);
-    } else if (Math.random() < 0.5) {
-      shuffled.push(failed[i++]);
-    } else {
-      shuffled.push(longTime[j++]);
-    }
-  }
+  // 실패 + 시간초과는 풀이 날짜 오름차순(오래된 순)으로 단일 정렬 (랜덤 섞지 않음)
+  const retry: Problem[] = [...failed, ...longTime].sort(
+    (a, b) =>
+      latestByProblem.get(a.id)!.solvedAt.localeCompare(
+        latestByProblem.get(b.id)!.solvedAt,
+      ),
+  );
 
   const unsolved = allProblems
     .filter((p) => !solvedProblemIds.has(p.id))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
-  return [...shuffled, ...unsolved].slice(0, 20).map((p) => ({
-    problemId: p.id,
-    platform: p.platform,
-    problemNumber: p.problemNumber,
-    title: p.title,
-    difficulty: p.difficulty,
-    categoryName: p.categoryName,
-  }));
+  return [...retry, ...unsolved].slice(0, 20).map((p) => {
+    const latest = latestByProblem.get(p.id);
+    return {
+      problemId: p.id,
+      platform: p.platform,
+      problemNumber: p.problemNumber,
+      title: p.title,
+      difficulty: p.difficulty,
+      categoryName: p.categoryName,
+      reason: latest == null ? "NEW" : !latest.success ? "FAILED" : "OVERTIME",
+      lastSolvedAt: latest?.solvedAt ?? null,
+      lastElapsedTime: latest?.elapsedTime ?? null,
+    } as RecommendProblem;
+  });
 }

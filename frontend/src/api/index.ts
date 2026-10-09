@@ -108,11 +108,13 @@ export const api = {
       platform?: Platform;
       categoryId?: number;
       hidden?: boolean;
+      userId?: number;
     }) => {
       const q = new URLSearchParams();
       if (params?.platform) q.set("platform", params.platform);
       if (params?.categoryId) q.set("categoryId", String(params.categoryId));
       if (params?.hidden !== undefined) q.set("hidden", String(params.hidden));
+      if (params?.userId !== undefined) q.set("userId", String(params.userId));
       return req<Problem[]>(`/api/problems${q.size ? `?${q}` : ""}`);
     },
     get: (id: number) => req<Problem>(`/api/problems/${id}`),

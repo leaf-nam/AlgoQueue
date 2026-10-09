@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth/AuthContext";
 import type { RecommendProblem } from "../types";
-import { DiffBadge, PlatformBadge, Loading, Empty } from "../components/shared";
+import { DiffBadge, PlatformBadge, Loading, Empty, fmtDate, fmtTime } from "../components/shared";
 import { useToast } from "../hooks/useToast";
 import { getGuestRecommends } from "../lib/guest";
 
@@ -44,6 +44,9 @@ export default function AlgoQueueRecommendPage() {
 
       <div className="card">
         <div className="card-title">⚡ 다음에 풀어야 할 문제</div>
+        <p className="text-muted text-sm" style={{ marginBottom: 12 }}>
+          실패 또는 15분 초과 풀이 중 오래된 순으로 정렬됩니다. (15분까지 인정)
+        </p>
         {loading ? (
           <Loading />
         ) : recommends.length === 0 ? (
@@ -61,9 +64,20 @@ export default function AlgoQueueRecommendPage() {
                   <PlatformBadge platform={p.platform} />
                   <DiffBadge diff={p.difficulty} />
                   <span className="badge badge-neutral">{p.categoryName}</span>
+                  {p.reason && p.reason !== "NEW" && (
+                    <span className={`badge ${p.reason === "FAILED" ? "badge-danger" : "badge-accent"}`}>
+                      {p.reason === "FAILED" ? "✕ 실패" : "⏱ 초과"}
+                    </span>
+                  )}
                 </div>
                 <div className="text-mono text-sm text-muted">
                   #{p.problemNumber}
+                  {p.lastSolvedAt && (
+                    <span> · {fmtDate(p.lastSolvedAt)}</span>
+                  )}
+                  {p.lastElapsedTime != null && (
+                    <span> · {fmtTime(p.lastElapsedTime)}</span>
+                  )}
                 </div>
               </div>
             ))}

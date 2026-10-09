@@ -40,46 +40,21 @@ public class RecommendService {
                     .max(comparing(SolveHistory::getSolvedAt)).orElse(null));
         }
 
-        List<Problem> failed = allProblems.stream()
+        List<Problem> retry = allProblems.stream()
                 .filter(p -> {
                     SolveHistory h = latestByProblem.get(p.getId());
-                    return h != null && !h.isSuccess();
+                    return h != null && (!h.isSuccess() || h.getElapsedTime() > 15);
                 })
                 .sorted(comparing(p -> latestByProblem.get(p.getId()).getSolvedAt()))
                 .toList();
-
-        Set<Long> failedIds = failed.stream().map(Problem::getId).collect(Collectors.toSet());
-        List<Problem> longTime = allProblems.stream()
-                .filter(p -> !failedIds.contains(p.getId()))
-                .filter(p -> {
-                    SolveHistory h = latestByProblem.get(p.getId());
-                    return h != null && h.getElapsedTime() >= 15;
-                })
-                .sorted(comparing(p -> latestByProblem.get(p.getId()).getSolvedAt()))
-                .toList();
-
-        List<Problem> shuffled = new ArrayList<>();
-        int i = 0, j = 0;
-        Random rand = new Random();
-        while (i < failed.size() || j < longTime.size()) {
-            if (i >= failed.size()) {
-                shuffled.add(longTime.get(j++));
-            } else if (j >= longTime.size()) {
-                shuffled.add(failed.get(i++));
-            } else if (rand.nextBoolean()) {
-                shuffled.add(failed.get(i++));
-            } else {
-                shuffled.add(longTime.get(j++));
-            }
-        }
 
         List<Problem> unsolved = allProblems.stream()
                 .filter(p -> !solvedProblemIds.contains(p.getId()))
                 .sorted(comparing(Problem::getCreatedAt).reversed())
                 .toList();
 
-        return Stream.concat(shuffled.stream(), unsolved.stream())
-                .map(RecommendProblemResponse::from)
+        return Stream.concat(retry.stream(), unsolved.stream())
+                .map(p -> RecommendProblemResponse.from(p, latestByProblem.get(p.getId())))
                 .limit(20)
                 .toList();
     }
